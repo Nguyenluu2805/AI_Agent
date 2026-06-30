@@ -8,7 +8,7 @@ from src import config
 from src.agents.base import BaseAgent
 from src.database.chroma_client import RikkeiChromaClient
 from src.services.rikkei_api import RikkeiPortalAPI
-from src.utils.publisher import publish_json_to_markdown
+from src.utils.publisher import publish_json_to_markdown, publish_reading_to_markdown
 
 class RikkeiAgent(BaseAgent):
     """
@@ -24,7 +24,7 @@ class RikkeiAgent(BaseAgent):
         # Hướng dẫn quy trình ReAct dạng JSON kèm theo bộ lọc môn học
         self.system_instruction = (
             "Bạn là một Trợ lý AI Agent tự trị (Autonomous Agent) chuyên trách đào tạo tại Rikkei Academy.\n"
-            "Nhiệm vụ của bạn là hỗ trợ biên soạn học liệu và sản xuất bộ bài tập về nhà dựa trên bối cảnh tri thức.\n\n"
+            "Nhiệm vụ của bạn là hỗ trợ biên soạn học liệu bao gồm Hệ thống bài tập về nhà (Homework) hoặc Bài đọc chuyên môn (Reading) dựa trên bối cảnh tri thức.\n\n"
             "QUY ĐỊNH ĐỊNH DẠNG PHẢN HỒI:\n"
             "Mỗi lượt phản hồi, bạn BẮT BUỘC phải trả về định dạng JSON thuần túy theo cấu trúc sau:\n"
             "{\n"
@@ -41,56 +41,47 @@ class RikkeiAgent(BaseAgent):
             "     * `subject` ('python', 'java' hoặc 'web' để lọc chính xác môn học cần tìm kiếm)\n"
             "2. `publish_homework_markdown(homework_json: dict)`:\n"
             "   - Đóng gói và xuất bản file Markdown từ cấu trúc bài tập JSON.\n"
-            "   - Bài tập của bạn sẽ được KIỂM DUYỆT nghiêm ngặt bởi Trưởng bộ môn dựa trên nội dung tệp quy chuẩn thực tế.\n"
-            "   - Tham số: `homework_json` là JSON có cấu trúc phẳng dễ xuất như sau:\n"
+            "   - Tham số: `homework_json` chứa thông tin bài tập (subject, chu_de, muc_tieu, danh_sach_bai_tap).\n"
+            "3. `publish_reading_markdown(reading_json: dict)`:\n"
+            "   - Đóng gói và xuất bản file Markdown từ cấu trúc bài đọc JSON.\n"
+            "   - Bài đọc của bạn sẽ được KIỂM DUYỆT nghiêm ngặt bởi Trưởng bộ môn dựa trên nội dung tệp quy chuẩn thực tế.\n"
+            "   - Tham số: `reading_json` có cấu trúc như sau:\n"
             "     {\n"
             '       "subject": "môn học chữ thường (\'python\', \'java\' hoặc \'web\')",\n'
-            '       "chu_de": "tên chủ đề chính của buổi học",\n'
-            '       "muc_tieu": "mục tiêu buổi học (học viên sẽ làm được gì)",\n'
-            '       "danh_sach_bai_tap": [\n'
-            "         {\n"
-            '           "ten_bai": "tên bài tập ngắn gọn",\n'
-            '           "muc_do": "mức độ phân hóa (\'Vận dụng cơ bản (1.5đ)\', \'Vận dụng chuyên sâu (2đ)\', \'Phân tích (2đ)\', \'Sáng tạo (3đ)\')",\n'
-            '           "boi_canh_nghiep_vu": "mô tả bối cảnh thực tế/dự án/vai diễn của bài tập",\n'
-            '           "code_loi_chua_sua": "đoạn code Python thô chạy được nhưng sai logic/thiếu điều kiện để sinh viên dò lỗi và vá (BẮT BUỘC có cho bài Vận dụng cơ bản, để trống cho các bài khác)",\n'
-            '           "yeu_cau_chi_tiet": "nội dung chi tiết yêu cầu đầu ra (phải tuân thủ cấu trúc mục con quy định bên dưới)",\n'
-            '           "tieu_chi_cham": ["danh sách gạch đầu dòng barem chấm điểm chi tiết (ví dụ: \'- 0.5đ: ...\')"]\n'
-            "         }\n"
-            "       ]\n"
+            '       "chu_de": "tên chủ đề chính của bài học",\n'
+            '       "dat_van_de": "tình huống thực tế (ví dụ: treo hệ thống do nghẽn cổ chai)",\n'
+            '       "phan_tich": "giải thích tại sao xảy ra và tại sao các cách làm thông thường không giải quyết được",\n'
+            '       "gioi_thieu_giai_phap": "giới thiệu cú pháp câu lệnh/công nghệ mới như một vị cứu tinh",\n'
+            '       "vi_du_minh_hoa": "khối code mẫu sạch (clean code) có chú thích rõ ràng từng dòng",\n'
+            '       "giai_quyet_van_de": "áp dụng chính cú pháp vừa học để sửa triệt để tình huống ở phần dat_van_de",\n'
+            '       "tong_ket_luu_y": "tóm tắt ngắn gọn và các lỗi thường gặp",\n'
+            '       "bo_cau_hoi_kiem_tra": [\n'
+            '         "Câu 1: Câu hỏi tự luận kiểm tra mức độ thông hiểu (hiểu bản chất/tại sao dùng)",\n'
+            '         "Câu 2: Câu hỏi tự luận kiểm tra mức độ vận dụng (dự đoán kết quả đoạn code)",\n'
+            '         "Câu 3: Câu hỏi tự luận kiểm tra mức độ phân tích (xử lý tình huống lỗi)"\n'
+            '       ]\n'
             "     }\n"
-            "3. `fetch_rikkei_systems()`:\n"
-            "   - [TẠM THỜI KHÔNG DÙNG] Lấy danh sách các Hệ đào tạo hiện có trên Rikkei Portal.\n"
-            "4. `sync_homework_to_rikkei(homework_json: dict)`:\n"
-            "   - [TẠM THỜI KHÔNG DÙNG] Đồng bộ dữ liệu bài tập lên Rikkei Portal.\n"
-            "5. `final_answer(response: str)`:\n"
+            "4. `fetch_rikkei_systems()`:\n"
+            "   - [TẠM THỜI KHÔNG DÙNG] Lấy danh sách các Hệ đào tạo.\n"
+            "5. `sync_homework_to_rikkei(homework_json: dict)`:\n"
+            "   - [TẠM THỜI KHÔNG DÙNG] Đồng bộ lên Rikkei Portal.\n"
+            "6. `final_answer(response: str)`:\n"
             "   - Trả lời trực tiếp cho người dùng sau khi đã hoàn tất toàn bộ các bước hành động cần thiết.\n"
             "   - Tham số: `response` (nội dung phản hồi hoàn thành nhiệm vụ gửi người dùng).\n\n"
-            "LUỒNG VẬN HÀNH BẮT BUỘC SOẠN BÀI TẬP:\n"
-            "Bạn phải thực hiện tuần tự qua các bước sau mà không được bỏ sót:\n"
-            "- Bước 1 (Truy vấn quy chuẩn): Bạn BẮT BUỘC gọi `retrieve_knowledge` với category='standards' và subject tương ứng môn học để đọc các quy định xây dựng bài tập.\n"
-            "- Bước 2 (Truy vấn giáo án): Gọi `retrieve_knowledge` với category='syllabuses' để tìm giáo trình lý thuyết môn học. Nếu giáo trình lý thuyết không tồn tại, tự lập luận nội dung chuyên môn dựa trên kiến thức nền nhưng sản phẩm bài tập vẫn phải đạt chuẩn 100% theo tiêu chuẩn ở bước 1.\n"
-            "- Bước 3 (Soạn bài tập & Đóng gói): Thiết kế bộ bài tập gồm đúng 5 bài và gọi công cụ `publish_homework_markdown` với cấu trúc `homework_json` đơn giản trên.\n"
-            "  * Quy định bắt buộc khi thiết kế nội dung bài tập:\n"
-            "    + Phân bổ: Gồm đúng 5 bài: Bài 1 & 2: Vận dụng cơ bản (1.5đ mỗi bài); Bài 3: Vận dụng chuyên sâu (2đ); Bài 4: Phân tích (2đ); Bài 5: Sáng tạo (3đ). Tổng điểm = 10.\n"
-            "    + Đóng HOW - Mở WHAT & WHY: Đề bài cấm chỉ định thuật toán hoặc các bước code cụ thể trong yêu cầu đề bài. Hãy để sinh viên tự do lựa chọn giải thuật. Ví dụ: cấm dùng cụm từ 'sử dụng hàm split', 'sử dụng hàm append', 'dùng vòng lặp for' trong đề bài.\n"
-            "    + Domain đồng nhất: Cả 5 bài cùng thuộc một bối cảnh nghiệp vụ thực tế duy nhất (ví dụ: Hệ thống bán hàng E-commerce, Quản lý kho hàng...).\n"
-            "    + Bẫy dữ liệu: Cài cắm ít nhất 1-2 kịch bản dữ liệu dị biệt (số âm, chuỗi trống, kiểu sai) và yêu cầu sinh viên viết code chặn lỗi để tránh crash.\n"
-            "    + Cấu trúc trình bày trong trường `yeu_cau_chi_tiet` của từng bài BẮT BUỘC tuân thủ đầu mục sau:\n"
-            "      * Bài 1 & 2 (Vận dụng cơ bản - Sửa lỗi/Vá code): Trường `code_loi_chua_sua` phải chứa mã nguồn lỗi logic/thiếu ràng buộc. Trường `yeu_cau_chi_tiet` định dạng:\n"
-            "        `[Vấn đề hiện tại]: Khách hàng phàn nàn... \n\n[Yêu cầu đầu ra]: 1. Chỉ ra đoạn code sai hoặc thiếu điều kiện bằng dữ liệu test case cụ thể. 2. Source code đã được sửa chuẩn.`\n"
-            "      * Bài 3 (Vận dụng chuyên sâu - Tự code): Trường `yeu_cau_chi_tiet` định dạng:\n"
-            "        `[Yêu cầu nghiệp vụ]: ... \n\n[Ràng buộc & Bẫy dữ liệu]: Đặt ra 1-2 kịch bản dữ liệu dị biệt... \n\n[Yêu cầu đầu ra]: 1. Báo cáo phân tích và thiết kế giải pháp (Phân tích bài toán I/O, đề xuất ý tưởng, thiết kế các bước mã giả). 2. Triển khai code hoàn chỉnh chặn bẫy.`\n"
-            "      * Bài 4 (Phân tích - Đa giải pháp): Trường `yeu_cau_chi_tiet` định dạng:\n"
-            "        `[Quy tắc nghiệp vụ]: ... \n\n[Ràng buộc & Bẫy dữ liệu]: ... \n\n[Yêu cầu đầu ra]: 1. Phân tích & Đề xuất (Xác định I/O, đề xuất tối thiểu 2 giải pháp khác nhau). 2. So sánh & Lựa chọn (Bảng so sánh ưu nhược trade-off, chốt chọn 1 giải pháp). 3. Thiết kế & Triển khai (Mã giả các bước, viết code hoàn chỉnh chặn bẫy).`\n"
-            "      * Bài 5 (Sáng tạo - Bài toán mở): Trường `yeu_cau_chi_tiet` định dạng:\n"
-            "        `[Ràng buộc kỹ thuật]: ... \n\n[Yêu cầu đầu ra]: 1. Thiết kế kiến trúc (Xác định các module và luồng data flow). 2. Sản phẩm hoàn chỉnh (Source code xử lý mượt mọi ngoại lệ/bẫy dữ liệu, giao tiếp thân thiện).`\n"
-            "- Bước 4 (Hoàn tất): Nếu công cụ trả về APPROVED, gọi công cụ `final_answer` để thông báo đường dẫn file Markdown cho người dùng và kết thúc nhiệm vụ. Nếu trả về REJECTED, tự sửa đổi bài tập theo feedback lỗi và gọi lại công cụ xuất bản. Chú ý: thoát các dấu nháy kép bên trong chuỗi bằng \\\" để tránh lỗi cú pháp parse JSON."
+            "LUỒNG VẬN HÀNH BẮT BUỘC:\n"
+            "- Bước 1 (Truy vấn quy chuẩn): Bạn BẮT BUỘC gọi `retrieve_knowledge` với category='standards' và subject tương ứng môn học để đọc các quy định xây dựng bài học hoặc bài tập.\n"
+            "- Bước 2 (Truy vấn giáo án): Gọi `retrieve_knowledge` với category='syllabuses' để tìm giáo trình lý thuyết môn học. Nếu giáo trình không tồn tại, tự lập luận nội dung chuyên môn dựa trên kiến thức nền nhưng sản phẩm vẫn phải đạt chuẩn 100% theo tiêu chuẩn ở bước 1.\n"
+            "- Bước 3 (Soạn thảo & Đóng gói):\n"
+            "  * Nếu yêu cầu là soạn Bài tập (Homework): Thiết kế bộ bài tập gồm đúng 5 bài và gọi công cụ `publish_homework_markdown` với cấu trúc `homework_json` thích hợp (Bài 1&2 cơ bản có code lỗi mẫu, bài 3, 4, 5 nâng cao có báo cáo phân tích/đa giải pháp/kiến trúc; cấm luật HOW; bối cảnh đồng nhất; bẫy dữ liệu).\n"
+            "  * Nếu yêu cầu là soạn Bài đọc (Reading): Thiết kế bài đọc Storytelling in Tech gồm đúng 7 phần bắt buộc và gọi công cụ `publish_reading_markdown` với cấu trúc `reading_json` chi tiết bên trên. Đảm bảo ngôn ngữ gần gũi, code mẫu sạch sẽ có highlight syntax.\n"
+            "- Bước 4 (Hoàn tất): Nếu công cụ trả về APPROVED, gọi công cụ `final_answer` để thông báo đường dẫn file Markdown cho người dùng và kết thúc nhiệm vụ. Nếu trả về REJECTED, tự sửa đổi theo feedback lỗi và gọi lại công cụ xuất bản tương ứng."
         )
 
         # Bản đồ ánh xạ gọi hàm Python
         self.tools_map = {
             'retrieve_knowledge': self._tool_retrieve_knowledge,
             'publish_homework_markdown': self._tool_publish_homework_markdown,
+            'publish_reading_markdown': self._tool_publish_reading_markdown,
             'fetch_rikkei_systems': self._tool_fetch_rikkei_systems,
             'sync_homework_to_rikkei': self._tool_sync_homework_to_rikkei
         }
@@ -222,11 +213,165 @@ class RikkeiAgent(BaseAgent):
 
         return None
 
+    def _validate_reading_structure(self, reading_json):
+        """
+        Kiểm duyệt cứng cấu trúc bài đọc chuẩn chỉnh bằng code Python.
+        """
+        if not isinstance(reading_json, dict):
+            return "Dữ liệu bài đọc truyền vào không phải là một Dictionary JSON."
+
+        subject = reading_json.get("subject")
+        chu_de = reading_json.get("chu_de")
+        if not subject or not chu_de:
+            return "Thiếu thông tin môn học ('subject') hoặc chủ đề chính ('chu_de') của bài đọc."
+
+        # Kiểm tra các phần tiêu đề và nội dung
+        required_sections = {
+            "dat_van_de": "Đặt vấn đề",
+            "phan_tich": "Phân tích",
+            "gioi_thieu_giai_phap": "Giới thiệu giải pháp",
+            "vi_du_minh_hoa": "Ví dụ minh họa",
+            "giai_quyet_van_de": "Giải quyết vấn đề",
+            "tong_ket_luu_y": "Tổng kết và lưu ý"
+        }
+        for prefix, label in required_sections.items():
+            tieu_de = reading_json.get(f"{prefix}_tieu_de", "").strip()
+            noi_dung = reading_json.get(f"{prefix}_noi_dung", "").strip()
+            if not tieu_de or not noi_dung:
+                return f"Bài đọc bị thiếu tiêu đề hoặc nội dung phần bắt buộc: '{label}' (yêu cầu các trường '{prefix}_tieu_de' và '{prefix}_noi_dung')."
+
+        # Kiểm tra ví dụ minh họa bắt buộc phải có code mẫu
+        vi_du = reading_json.get("vi_du_minh_hoa_noi_dung", "")
+        if "def " not in vi_du and "print(" not in vi_du and "class " not in vi_du and "public class " not in vi_du and "import " not in vi_du and "```" not in vi_du:
+            return "Phần 'Ví dụ minh họa' (vi_du_minh_hoa_noi_dung) phải chứa mã nguồn minh họa rõ ràng."
+
+        # Kiểm tra bộ câu hỏi kiểm tra
+        bo_cau_hoi = reading_json.get("bo_cau_hoi_kiem_tra", [])
+        if not isinstance(bo_cau_hoi, list):
+            return "Trường 'bo_cau_hoi_kiem_tra' phải là một danh sách (List) chứa đúng 3 câu hỏi."
+        if len(bo_cau_hoi) != 3:
+            return f"Số lượng câu hỏi kiểm tra không đúng. Yêu cầu đúng 3 câu, hiện tại có {len(bo_cau_hoi)} câu."
+
+        # Kiểm tra mức độ của từng câu hỏi
+        q1, q2, q3 = bo_cau_hoi[0].lower(), bo_cau_hoi[1].lower(), bo_cau_hoi[2].lower()
+        if "thông hiểu" not in q1 and "bản chất" not in q1 and "tại sao" not in q1 and "hiểu" not in q1:
+            return "Câu hỏi 1 (bo_cau_hoi_kiem_tra[0]) phải thuộc mức độ Thông hiểu (hỏi về bản chất/tại sao dùng)."
+        if "vận dụng" not in q2 and "đoạn code" not in q2 and "kết quả" not in q2 and "dự đoán" not in q2:
+            return "Câu hỏi 2 (bo_cau_hoi_kiem_tra[1]) phải thuộc mức độ Vận dụng (yêu cầu dự đoán kết quả đoạn code/chạy thử code)."
+        if "phân tích" not in q3 and "tình huống lỗi" not in q3 and "lỗi" not in q3 and "sửa" not in q3 and "khắc phục" not in q3:
+            return "Câu hỏi 3 (bo_cau_hoi_kiem_tra[2]) phải thuộc mức độ Phân tích (xử lý tình huống lỗi/phát hiện lỗi logic)."
+
+        return None
+
+    def _tool_publish_reading_markdown(self, reading_json):
+        try:
+            chu_de = reading_json.get("chu_de", "Bai_Doc")
+            subject = reading_json.get("subject", "python").lower()
+            print(f"   [Publisher Tool] Tiến hành gửi bài đọc học phần '{chu_de}' qua vòng lặp kiểm duyệt (Reflection Loop) môn '{subject}'...")
+            
+            # --- 1. KIỂM DUYỆT CỨNG BẰNG PYTHON (PROGRAMMATIC VALIDATION) ---
+            validation_error = self._validate_reading_structure(reading_json)
+            if validation_error:
+                print(f"   [Programmatic Validation] Kiem duyet THAT BAI: {validation_error}")
+                return f"Lỗi kiểm duyệt chất lượng (REJECTED): {validation_error} Vui lòng tự sửa đổi bài đọc cho đúng quy chuẩn và gọi lại công cụ này."
+            
+            print("   [Programmatic Validation] Kiem duyet cau truc thanh cong.")
+            
+            # --- 2. ĐỌC QUY CHUẨN ĐỂ LLM SUPERVISOR KIỂM DUYỆT SÂU ---
+            standards_context = ""
+            try:
+                standards_dir = os.path.join(config.DIR_STANDARDS, subject.capitalize())
+                if os.path.exists(standards_dir):
+                    contents = []
+                    for f_name in os.listdir(standards_dir):
+                        if f_name.endswith(('.txt', '.md')):
+                            with open(os.path.join(standards_dir, f_name), "r", encoding="utf-8") as sf:
+                                contents.append(sf.read())
+                    if contents:
+                        standards_context = "\n\n".join(contents)
+                        print(f"   [Publisher Tool] Da doc truc tiep quy chuan tu o cung ({len(standards_context)} ky tu).")
+            except Exception as fe:
+                print(f"   [Publisher Tool] Loi doc quy chuan truc tiep: {fe}")
+
+            if not standards_context:
+                try:
+                    res = self.chroma_client.col_standards.query(
+                        query_texts=["Quy định xây dựng hệ thống bài học bài đọc"],
+                        n_results=10,
+                        where={"subject": subject}
+                    )
+                    if res and res.get('documents') and len(res['documents']) > 0:
+                        standards_context = "\n\n".join(res['documents'][0])
+                        print(f"   [Publisher Tool] Da tai quy chuan du phong tu Vector DB ({len(standards_context)} ky tu).")
+                except Exception as dbe:
+                    print(f"   [ChromaDB Warning] Loi khi truy van quy chuan du phong: {dbe}")
+            
+            if not standards_context:
+                standards_context = (
+                    "Quy chuẩn bài đọc bắt buộc:\n"
+                    "1. Phải tuân thủ nguyên tắc Storytelling in Tech, không liệt kê định nghĩa khô khan.\n"
+                    "2. Gồm đủ 7 phần: Đặt vấn đề, Phân tích, Giới thiệu giải pháp, Ví dụ minh họa, Giải quyết vấn đề, Tổng kết lưu ý, 3 câu hỏi tự luận theo 3 mức độ (thông hiểu, vận dụng, phân tích)."
+                )
+
+            # --- VÒNG LẶP KIỂM DUYỆT CHẤT LƯỢNG (REFLECTION LOOP) ---
+            evaluation_instruction = (
+                "Bạn là một Trưởng bộ môn kiểm định chất lượng học liệu chuyên nghiệp tại Rikkei Academy.\n"
+                "Nhiệm vụ của bạn là đánh giá chất lượng bài đọc chuyên môn do AI Agent thiết kế sau đây.\n\n"
+                "Bạn BẮT BUỘC phải đối chiếu kỹ lượng bài đọc với Tài liệu Quy chuẩn học liệu được cung cấp dưới đây.\n\n"
+                f"--- TÀI LIỆU QUY CHUẨN KIỂM ĐỊNH ---\n{standards_context}\n--------------------------------------\n\n"
+                "Các điểm kiểm tra cốt lõi bắt buộc (NẾU BÀI ĐỌC KHÔNG ĐÁP ỨNG THÌ PHẢI BÁO REJECTED NGAY):\n"
+                "1. Bài đọc có viết theo phong cách Storytelling in Tech không? (Bắt đầu bằng một tình huống thực tế lỗi/nghẽn/treo ở phần 1 Đặt vấn đề, phân tích nguyên nhân ở phần 2, đưa ra giải pháp mới ở phần 3, minh họa code ở phần 4, áp dụng giải pháp để sửa lỗi phần 1 ở phần 5).\n"
+                "2. Bộ câu hỏi kiểm tra ở phần 7 có đúng 3 câu hỏi tự luận ngắn tương ứng với 3 mức độ: Câu 1 (Thông hiểu về bản chất/tại sao dùng), Câu 2 (Vận dụng dự đoán kết quả code), Câu 3 (Phân tích xử lý tình huống lỗi) không?\n"
+                "3. Có chứa bất kỳ biểu tượng cảm xúc (emoji/icon) nào trong tiêu đề hoặc nội dung phản hồi không? Tuyệt đối cấm sử dụng emoji.\n\n"
+                "BẮT BUỘC TRẢ VỀ JSON CÓ CẤU TRÚC CHÍNH XÁC NHƯ SAU:\n"
+                "{\n"
+                '  "status": "APPROVED" hoặc "REJECTED",\n'
+                '  "reason": "Giải thích chi tiết lý do duyệt hoặc lý do từ chối cụ thể kèm hướng dẫn từng bước cách sửa đổi bài đọc cho đúng tiêu chuẩn"\n'
+                "}"
+            )
+            
+            eval_prompt = f"Hãy đánh giá bài đọc sau:\n{json.dumps(reading_json, ensure_ascii=False, indent=2)}"
+            
+            print("   [Reflection Loop] Dang goi Truong bo mon LLM de kiem dinh chat luong...")
+            eval_res = ollama.chat(
+                model=self.model_name,
+                messages=[
+                    {"role": "system", "content": evaluation_instruction},
+                    {"role": "user", "content": eval_prompt}
+                ],
+                format="json"
+            )
+            
+            eval_data = json.loads(eval_res['message']['content'])
+            status = eval_data.get("status", "REJECTED").upper()
+            reason = eval_data.get("reason", "Không có mô tả chi tiết lý do.")
+            
+            if status == "REJECTED":
+                print(f"   [Reflection Loop] Kiem duyet THAT BAI: {reason}")
+                return f"Lỗi kiểm duyệt chất lượng (REJECTED): {reason}. Vui lòng tự sửa đổi bài đọc cho đúng quy chuẩn và gọi lại công cụ này."
+                
+            print("   [Reflection Loop] Kiem duyet THANH CONG: APPROVED.")
+            
+            # --- LƯU TRỮ VẬT LÝ SAU KHI ĐƯỢC PHÊ DUYỆT ---
+            safe_name = chu_de.replace(" ", "_").replace("-", "_")
+            json_file_path = os.path.join(config.OUTPUT_JSON_DIR, f"RawAgent_Reading_{safe_name}.json")
+            with open(json_file_path, "w", encoding="utf-8") as f:
+                json.dump(reading_json, f, ensure_ascii=False, indent=4)
+                
+            # Đóng gói sang Markdown
+            md_file_path = publish_reading_to_markdown(reading_json)
+            if md_file_path:
+                return f"Kiểm duyệt thông qua (APPROVED). Đã xuất bản file JSON tại '{json_file_path}' và file Markdown tại '{md_file_path}'."
+            return "Kiểm duyệt thông qua nhưng gặp lỗi khi xuất bản file Markdown."
+            
+        except Exception as e:
+            return f"Lỗi trong quá trình kiểm duyệt và xuất bản bài đọc: {str(e)}"
+
     def _tool_publish_homework_markdown(self, homework_json):
         try:
             chu_de = homework_json.get("chu_de", "Bai_Tap")
             subject = homework_json.get("subject", "python").lower()
-            print(f"   📝 [Publisher Tool] Tiến hành gửi bài tập học phần '{chu_de}' qua vòng lặp kiểm duyệt (Reflection Loop) môn '{subject}'...")
+            print(f"   [Publisher Tool] Tiến hành gửi bài tập học phần '{chu_de}' qua vòng lặp kiểm duyệt (Reflection Loop) môn '{subject}'...")
             
             # --- 1. KIỂM DUYỆT CỨNG BẰNG PYTHON (PROGRAMMATIC VALIDATION) ---
             validation_error = self._validate_homework_structure(homework_json)
@@ -353,9 +498,22 @@ class RikkeiAgent(BaseAgent):
         Kích hoạt vòng lặp tư duy tự quyết định công cụ (ReAct loop) của RikkeiAgent.
         """
         print(f"\n[Agent] Da tiep nhan yeu cau hanh dong tu tri: '{user_command}'")
+        
+        is_reading = "bài đọc" in user_command.lower() or "reading" in user_command.lower()
+        if is_reading:
+            strict_instruction = (
+                self.system_instruction + 
+                "\n\nLƯU Ý ĐẶC BIỆT: Yêu cầu hiện tại của người dùng là thiết kế BÀI ĐỌC (Reading). Bạn BẮT BUỘC phải gọi công cụ 'publish_reading_markdown' và cấm tuyệt đối gọi 'publish_homework_markdown'. Đảm bảo cấu trúc JSON bài đọc có đủ các khoá tieu_de và noi_dung cho từng phần I-VI như đã được định nghĩa."
+            )
+        else:
+            strict_instruction = (
+                self.system_instruction + 
+                "\n\nLƯU Ý ĐẶC BIỆT: Yêu cầu hiện tại của người dùng là thiết kế BÀI TẬP VỀ NHÀ (Homework). Bạn BẮT BUỘC phải gọi công cụ 'publish_homework_markdown' và cấm tuyệt đối gọi 'publish_reading_markdown'."
+            )
+            
         final_answer = self.chat_with_tools(
             user_message=user_command,
-            system_instruction=self.system_instruction,
+            system_instruction=strict_instruction,
             tools_map=self.tools_map
         )
         return final_answer

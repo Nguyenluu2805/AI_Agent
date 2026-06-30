@@ -28,7 +28,9 @@ def main():
         print("[Loi] Yeu cau khong duoc de trong.")
         sys.exit(1)
 
-    print(f"\n[He thong] Dang kich hoat AI Agent tu tri de thiet ke bai tap cho chu de: '{user_input}'...")
+    is_reading = "bài đọc" in user_input.lower() or "reading" in user_input.lower()
+    type_label = "bai doc" if is_reading else "bai tap"
+    print(f"\n[He thong] Dang kich hoat AI Agent tu tri de thiet ke {type_label} cho chu de: '{user_input}'...")
     response = agent.run_agent(user_input)
 
     if response:
