@@ -26,43 +26,57 @@ Hệ thống hỗ trợ song hành hai chức năng cốt lõi:
 ## Sơ đồ luồng thực thi hệ thống
 
 ```mermaid
-flowchart TB
-    %% Subgraph 1: Tri thức nguồn
-    subgraph RAG_Source["1. NGUỒN TRI THỨC (Local RAG)"]
-        TC["Quy chuẩn Học liệu\n(Tieu_Chuan/)"]
-        GA["Giáo án & Giáo trình\n(Giao_An/)"]
-        TC & GA --> |Đồng bộ hóa| DB[(Vector DB: ChromaDB)]
+flowchart TD
+    %% Khai báo các Style chính
+    classDef source fill:#e1f5fe,stroke:#0288d1,stroke-width:2px,color:#01579b;
+    classDef agent fill:#fce4ec,stroke:#d81b60,stroke-width:2px,color:#880e4f;
+    classDef check fill:#e8f5e9,stroke:#43a047,stroke-width:2px,color:#1b5e20;
+    classDef output fill:#fff8e1,stroke:#ffb300,stroke-width:2px,color:#7f5f00;
+    classDef database fill:#ede7f6,stroke:#5e35b1,stroke-width:2px,color:#311b92;
+
+    %% 1. Nguồn Tri Thức & RAG
+    subgraph S1["1. HỆ THỐNG TRI THỨC NGUỒN (RAG)"]
+        A["Quy chuẩn thiết kế học liệu"]:::source
+        B["Giáo án & Giáo trình chuyên môn"]:::source
+        A & B -->|Vector hóa| C[(ChromaDB Vector Store)]:::database
     end
 
-    %% Subgraph 2: Khối xử lý trung tâm
-    subgraph Agent_Core["2. BỘ NÃO XỬ LÝ (AI Engine)"]
-        Req["Yêu cầu: Chủ đề + Môn học\n(Bài tập / Bài đọc)"] --> Agent["Trí tuệ nhân tạo AI"]
-        DB --> |Truy vấn ngữ cảnh| Agent
-        Agent --> |Thiết kế nháp| Draft["Draft Học liệu (JSON)"]
+    %% 2. Tiếp nhận & Định tuyến ý định
+    subgraph S2["2. TIẾP NHẬN & PHÂN LOẠI Ý ĐỊNH"]
+        D["Yêu cầu từ Giảng viên\n(Prompt hoặc Paste nội dung)"]:::source
+        D --> E{Nhận diện Ý định?}:::agent
+        E -->|Chứa từ khóa 'Bài đọc/Reading'| F["Định tuyến: Thiết kế BÀI ĐỌC"]:::agent
+        E -->|Mặc định khác| G["Định tuyến: Thiết kế BÀI TẬP"]:::agent
     end
 
-    %% Subgraph 3: Kiểm duyệt kép
-    subgraph Quality_Gate["3. CỔNG KIỂM DUYỆT CHẤT LƯỢNG KÉP"]
-        Draft --> Gate1{"Kiểm duyệt Cứng\n(Python Validator)"}
-        Gate1 --> |Vượt qua| Gate2{"Kiểm duyệt Mềm\n(LLM Supervisor)"}
-        Gate2 --> | APPROVED | Publish["Đóng gói xuất bản"]
+    %% 3. Bộ Não Xử Lý AI Agent
+    subgraph S3["3. BỘ NÃO LẬP LUẬN TỰ TRỊ (ReAct Engine)"]
+        C -->|Lọc Metadata theo Môn học| H["AI Agent Core"]:::agent
+        F & G --> H
+        H -->|Tự suy luận & Nạp bối cảnh| I["Khởi tạo Draft JSON học liệu"]:::agent
+    end
+
+    %% 4. Cổng Kiểm Duyệt Kép & Tự Sửa Sai
+    subgraph S4["4. CỔNG KIỂM DUYỆT CHẤT LƯỢNG KÉP"]
+        I --> J{"Tầng 1: Kiểm duyệt Cứng\n(Python Validator)"}:::check
         
-        %% Luồng tự sửa sai
-        Gate1 --> |Không đạt| Feedback["Phản hồi lỗi chi tiết"]
-        Gate2 --> | REJECTED | Feedback
-        Feedback --> |Tự động sửa lỗi| Agent
+        %% Check Bài tập / Bài đọc
+        J -->|Đạt chuẩn cấu trúc| K{"Tầng 2: Kiểm duyệt Mềm\n(LLM Supervisor)"}:::check
+        
+        %% Luồng từ chối
+        J -->|Sai cấu trúc / Thiếu phần| L["Báo cáo lỗi chi tiết"]:::check
+        K -->|REJECTED (Sai nghiệp vụ)| L
+        L -->|Self-Correction Loop| H
+        
+        %% Phê duyệt
+        K -->|APPROVED| M["Đóng gói & Xuất bản"]:::check
     end
 
-    %% Subgraph 4: Thành phẩm
-    subgraph Deliverables["4. SẢN PHẨM ĐẦU RA"]
-        Publish --> MD["Markdown Giáo án đẹp\n(data/outputs/markdown/)"]
-        Publish --> JSON["JSON thô để đồng bộ\n(data/outputs/raw_json/)"]
+    %% 5. Thành phẩm
+    subgraph S5["5. ĐÓNG GÓI THÀNH PHẨM DƯỚI THƯ MỤC OUTPUTS"]
+        M --> N["File Markdown (Định dạng đẹp, Sạch Emoji)"]:::output
+        M --> O["File JSON (Ready-to-sync API Rikkei Portal)"]:::output
     end
-
-    style RAG_Source fill:#f0f8ff,stroke:#0055ff,stroke-width:1.5px
-    style Agent_Core fill:#fff0f5,stroke:#ff00bb,stroke-width:1.5px
-    style Quality_Gate fill:#f0fff0,stroke:#00aa00,stroke-width:1.5px
-    style Deliverables fill:#fffae6,stroke:#ffaa00,stroke-width:1.5px
 ```
 
 ---
