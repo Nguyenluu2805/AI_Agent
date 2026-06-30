@@ -508,7 +508,17 @@ class RikkeiAgent(BaseAgent):
         if is_reading:
             strict_instruction = (
                 self.system_instruction + 
-                "\n\nLƯU Ý ĐẶC BIỆT: Yêu cầu hiện tại của người dùng là thiết kế BÀI ĐỌC (Reading). Bạn BẮT BUỘC phải gọi công cụ 'publish_reading_markdown' và cấm tuyệt đối gọi 'publish_homework_markdown'. Đảm bảo cấu trúc JSON bài đọc có đủ các khoá tieu_de và noi_dung cho từng phần I-VI như đã được định nghĩa."
+                "\n\nLƯU Ý ĐẶC BIỆT: Yêu cầu hiện tại của người dùng là thiết kế BÀI ĐỌC (Reading). Bạn BẮT BUỘC phải gọi công cụ 'publish_reading_markdown' và cấm tuyệt đối gọi 'publish_homework_markdown'. Đảm bảo cấu trúc JSON bài đọc có đầy đủ tất cả các khoá bắt buộc sau đây:\n"
+                "1. 'subject'\n"
+                "2. 'chu_de'\n"
+                "3. 'dat_van_de_tieu_de' và 'dat_van_de_noi_dung'\n"
+                "4. 'phan_tich_tieu_de' và 'phan_tich_noi_dung'\n"
+                "5. 'gioi_thieu_giai_phap_tieu_de' và 'gioi_thieu_giai_phap_noi_dung'\n"
+                "6. 'vi_du_minh_hoa_tieu_de' và 'vi_du_minh_hoa_noi_dung'\n"
+                "7. 'giai_quyet_van_de_tieu_de' và 'giai_quyet_van_de_noi_dung'\n"
+                "8. 'tong_ket_luu_y_tieu_de' và 'tong_ket_luu_y_noi_dung'\n"
+                "9. 'bo_cau_hoi_kiem_tra' (mảng chứa đúng 3 câu hỏi tự luận theo 3 cấp độ).\n"
+                "Tuyệt đối cấm gộp khóa, cấm viết thiếu hoặc sai chính tả các khóa này."
             )
         else:
             strict_instruction = (

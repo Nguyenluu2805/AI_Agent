@@ -72,7 +72,7 @@ class BaseAgent:
         # Danh sách tin nhắn tạm để lưu lại vào lịch sử sau khi hoàn tất lượt
         new_messages = [{"role": "user", "content": user_message}]
         
-        max_steps = 15  # Tránh vòng lặp vô hạn (tăng lên 15 để đủ số bước tự sửa bài tập)
+        max_steps = 20  # Tránh vòng lặp vô hạn (tăng lên 20 để đủ số bước tự sửa học liệu)
         step = 0
         
         try:
