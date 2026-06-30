@@ -29,9 +29,10 @@ ENV/
 env.bak/
 venv.bak/
 
-# Local databases (large binary files generated dynamically)
+# Local databases and models (large binary files generated dynamically)
 chroma_store/
 data/chroma_db/
+Ollama_Models/
 
 # Output folder for generated files (optional, but usually local outputs aren't committed)
 # data/outputs/
