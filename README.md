@@ -1,6 +1,6 @@
-# Hệ thống AI Agent Tự Trị Hỗ Trợ Đào Tạo Rikkei
+# Hệ thống Hỗ Trợ Đào Tạo Rikkei
 
-Hệ thống AI Agent ứng dụng kỹ thuật RAG (Retrieval-Augmented Generation) với ChromaDB cục bộ kết hợp bộ não Gemma2 chạy thông qua Ollama để tự động thiết kế và đóng gói học liệu chuyên nghiệp cho học viên theo đúng tiêu chuẩn nghiệp vụ của Rikkei Academy. 
+Hệ thống ứng dụng kỹ thuật RAG (Retrieval-Augmented Generation) với ChromaDB cục bộ kết hợp bộ não Gemma2 chạy thông qua Ollama để tự động thiết kế và đóng gói học liệu chuyên nghiệp cho học viên theo đúng tiêu chuẩn nghiệp vụ của Rikkei Academy. 
 
 Hệ thống hỗ trợ song hành hai chức năng cốt lõi:
 1. **Thiết kế Hệ thống bài tập về nhà (Homework):** Bộ 5 bài phân cấp độ, bối cảnh thực tế đồng nhất, cài bẫy dữ liệu và cấm chỉ định thuật toán (Đóng HOW).
@@ -11,12 +11,12 @@ Hệ thống hỗ trợ song hành hai chức năng cốt lõi:
 ## Các tính năng nổi bật
 
 1. **Tự động hóa toàn diện (Automated Pipeline):**
-   Khi chạy chương trình, hệ thống tự động đồng bộ hóa tài liệu tri thức (RAG), tự động nhận diện ý định của người dùng từ dòng lệnh (Bài tập vs Bài đọc) và kích hoạt Agent để thiết kế, kiểm duyệt và xuất bản học liệu mà không cần thông qua menu lựa chọn phức tạp.
+   Khi chạy chương trình, hệ thống tự động đồng bộ hóa tài liệu tri thức (RAG), tự động nhận diện ý định của người dùng từ dòng lệnh (Bài tập vs Bài đọc) và kích hoạt AI để thiết kế, kiểm duyệt và xuất bản học liệu mà không cần thông qua menu lựa chọn phức tạp.
 
 2. **Kiểm duyệt kép (Hybrid Validation & Reflection Loop):**
    * **Kiểm duyệt cứng (Programmatic Validation):** Quét cấu trúc dữ liệu JSON bằng mã nguồn Python. Phát hiện thiếu phần, sai mức điểm, thiếu code lỗi bài cơ bản, thiếu so sánh đa giải pháp bài phân tích, thiếu kiến trúc bài sáng tạo đối với Bài tập; hoặc thiếu các phần La Mã, thiếu ví dụ mã nguồn, sai định dạng 3 mức độ câu hỏi đối với Bài đọc; đồng thời chặn đứng quy tắc Đóng HOW.
    * **Kiểm duyệt mềm (LLM Supervisor Evaluation):** LLM Trưởng bộ môn đối chiếu học liệu với tiêu chuẩn nghiệp vụ thực tế để phê duyệt (APPROVED) hoặc từ chối (REJECTED).
-   * **Tự động sửa lỗi (Self-Correction):** Nếu bị từ chối, Agent sẽ đọc phản hồi chi tiết, tự sửa sai qua các lượt ReAct cho đến khi đạt chuẩn 100%.
+   * **Tự động sửa lỗi (Self-Correction):** Nếu bị từ chối, AI sẽ tự động đọc phản hồi chi tiết, tự sửa sai qua các lượt ReAct cho đến khi đạt chuẩn 100%.
 
 3. **Định dạng xuất bản chuẩn hóa:**
    Tự động xuất tệp Markdown không dùng biểu tượng cảm xúc (emoji/icon) ở cả tiêu đề và nội dung, căn lề thẳng tắp khối code mẫu và cấu trúc phân cấp mạch lạc.
@@ -35,8 +35,8 @@ flowchart TB
     end
 
     %% Subgraph 2: Khối xử lý trung tâm
-    subgraph Agent_Core["2. BỘ NÃO XỬ LÝ (AI Agent Engine)"]
-        Req["Yêu cầu: Chủ đề + Môn học\n(Bài tập / Bài đọc)"] --> Agent["AI Agent tự trị"]
+    subgraph Agent_Core["2. BỘ NÃO XỬ LÝ (AI Engine)"]
+        Req["Yêu cầu: Chủ đề + Môn học\n(Bài tập / Bài đọc)"] --> Agent["Trí tuệ nhân tạo AI"]
         DB --> |Truy vấn ngữ cảnh| Agent
         Agent --> |Thiết kế nháp| Draft["Draft Học liệu (JSON)"]
     end

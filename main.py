@@ -9,7 +9,7 @@ def main():
     agent = RikkeiAgent(chroma_client=db_client)
 
     print("=======================================================================")
-    print("HE THONG TRO LY AI AGENT TU TRI RIKKEI PORTAL - TU DONG HOA TOAN DIEN")
+    print("HE THONG HO TRO DAO TAO RIKKEI - TU DONG HOA TOAN DIEN")
     print("=======================================================================")
 
     # 1. Tự động đồng bộ hóa tài liệu tri thức đầu vào
@@ -20,7 +20,7 @@ def main():
     # 2. Lấy chủ đề bài tập từ tham số dòng lệnh hoặc từ người dùng
     if len(sys.argv) > 1:
         user_input = sys.argv[1].strip()
-        print(f"Nhan yeu cau tu tham so dong lenh: '{user_input}'")
+        print(f"Nhan yeu cau tu tham so dòng lenh: '{user_input}'")
     else:
         user_input = input("Nhap yeu cau thiet ke bai tap (vi du: String, Mang va List...): ").strip()
         
@@ -30,7 +30,7 @@ def main():
 
     is_reading = "bài đọc" in user_input.lower() or "reading" in user_input.lower()
     type_label = "bai doc" if is_reading else "bai tap"
-    print(f"\n[He thong] Dang kich hoat AI Agent tu tri de thiet ke {type_label} cho chu de: '{user_input}'...")
+    print(f"\n[He thong] Dang thuc hien thiet ke {type_label} cho chu de: '{user_input}'...")
     response = agent.run_agent(user_input)
 
     if response:

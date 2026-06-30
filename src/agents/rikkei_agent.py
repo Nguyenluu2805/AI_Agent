@@ -21,9 +21,8 @@ class RikkeiAgent(BaseAgent):
         self.chroma_client = chroma_client
         self.api_service = RikkeiPortalAPI()
         
-        # Hướng dẫn quy trình ReAct dạng JSON kèm theo bộ lọc môn học
         self.system_instruction = (
-            "Bạn là một Trợ lý AI Agent tự trị (Autonomous Agent) chuyên trách đào tạo tại Rikkei Academy.\n"
+            "Bạn là một Trợ lý AI chuyên trách đào tạo tại Rikkei Academy.\n"
             "Nhiệm vụ của bạn là hỗ trợ biên soạn học liệu bao gồm Hệ thống bài tập về nhà (Homework) hoặc Bài đọc chuyên môn (Reading) dựa trên bối cảnh tri thức.\n\n"
             "QUY ĐỊNH ĐỊNH DẠNG PHẢN HỒI:\n"
             "Mỗi lượt phản hồi, bạn BẮT BUỘC phải trả về định dạng JSON thuần túy theo cấu trúc sau:\n"

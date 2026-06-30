@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Agent Tự Trị - Rikkei Academy</title>
+    <title>Hệ thống hỗ trợ đào tạo - Rikkei Academy</title>
     <!-- Nhúng Google Font Outfit và JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -553,8 +553,8 @@
     <!-- SIDEBAR: LỊCH SỬ HỌC LIỆU -->
     <aside>
         <div class="logo-section">
-            <span class="logo-title">Rikkei AI Portal</span>
-            <span class="logo-sub">Autonomous Agent</span>
+            <span class="logo-title">Rikkei AI</span>
+            <span class="logo-sub">Hỗ Trợ Đào Tạo</span>
         </div>
         
         <input type="text" class="search-history" placeholder="Tìm kiếm tài liệu cũ..." id="historySearchInput">
@@ -613,13 +613,13 @@
             <!-- KHUNG MONITOR TRẠNG THÁI -->
             <div class="console-card">
                 <div class="console-header">
-                    <span class="console-title">Trạng thái Agent vận hành</span>
+                    <span class="console-title">Trạng thái vận hành</span>
                     <span class="timer-badge" id="timerBadge">00:00</span>
                 </div>
                 <div class="console-body" id="consoleBody">
                     <div class="empty-state">
                         <div class="empty-icon">📟</div>
-                        <p>Hệ thống đang rảnh. Hãy bắt đầu một lệnh biên soạn mới để theo dõi luồng xử lý tự trị.</p>
+                        <p>Hệ thống đang rảnh. Hãy bắt đầu một lệnh biên soạn mới để theo dõi luồng xử lý.</p>
                     </div>
                 </div>
             </div>
@@ -880,8 +880,8 @@
             
             setTimeout(() => {
                 addLog(`Đồng bộ bộ nhớ dài hạn ChromaDB hoàn tất!`, 'success');
-                addLog(`Kích hoạt AI Agent tự trị (Mô hình: Gemma2)...`, 'active');
-                addLog(`Đang gửi yêu cầu vào ReAct Loop: "${prompt}"`, 'active');
+                addLog(`Kích hoạt trí tuệ nhân tạo AI (Mô hình: Gemma2)...`, 'active');
+                addLog(`Đang gửi yêu cầu xử lý: "${prompt}"`, 'active');
                 addLog(`AI đang suy nghĩ và thiết lập bối cảnh RAG... (Quá trình này mất khoảng 1-2 phút)...`, 'active');
             }, 1000);
 
@@ -896,7 +896,7 @@
                 stopTimer();
 
                 if (data.status === 'success') {
-                    addLog(`AI Agent hoàn thành lập luận.`, 'success');
+                    addLog(`AI hoàn thành lập luận.`, 'success');
                     addLog(`Bộ kiểm duyệt Programmatic Validation: APPROVED!`, 'success');
                     addLog(`LLM Supervisor (Trưởng bộ môn): APPROVED!`, 'success');
                     addLog(`Đóng gói xuất bản thành công!`, 'success');
