@@ -45,7 +45,7 @@ flowchart TD
     subgraph S2["2. TIẾP NHẬN & PHÂN LOẠI Ý ĐỊNH"]
         D["Yêu cầu từ Giảng viên\n(Prompt hoặc Paste nội dung)"]:::source
         D --> E{Nhận diện Ý định?}:::agent
-        E -->|Chứa từ khóa 'Bài đọc/Reading'| F["Định tuyến: Thiết kế BÀI ĐỌC"]:::agent
+        E -->|"Chứa từ khóa 'Bài đọc/Reading'"| F["Định tuyến: Thiết kế BÀI ĐỌC"]:::agent
         E -->|Mặc định khác| G["Định tuyến: Thiết kế BÀI TẬP"]:::agent
     end
 
@@ -65,7 +65,7 @@ flowchart TD
         
         %% Luồng từ chối
         J -->|Sai cấu trúc / Thiếu phần| L["Báo cáo lỗi chi tiết"]:::check
-        K -->|REJECTED (Sai nghiệp vụ)| L
+        K -->|"REJECTED (Sai nghiệp vụ)"| L
         L -->|Self-Correction Loop| H
         
         %% Phê duyệt
