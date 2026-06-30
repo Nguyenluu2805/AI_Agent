@@ -1,5 +1,4 @@
-# Hệ thống AI Agent Tự Trị Hỗ Trợ Đào Tạo Rikkei Portal
-
+# Hệ thống AI Agent Tự Trị Hỗ Trợ Đào Tạo Rikkei 
 Hệ thống AI Agent ứng dụng kỹ thuật RAG (Retrieval-Augmented Generation) với ChromaDB cục bộ kết hợp bộ não Gemma2 chạy thông qua Ollama để tự động thiết kế và đóng gói hệ thống bài tập về nhà cho học viên theo đúng tiêu chuẩn nghiệp vụ của Rikkei Academy.
 
 ---
