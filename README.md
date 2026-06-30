@@ -27,54 +27,24 @@ Hệ thống hỗ trợ song hành hai chức năng cốt lõi:
 
 ```mermaid
 flowchart TD
-    %% Khai báo các Style chính
-    classDef source fill:#e1f5fe,stroke:#0288d1,stroke-width:2px,color:#01579b;
-    classDef agent fill:#fce4ec,stroke:#d81b60,stroke-width:2px,color:#880e4f;
-    classDef check fill:#e8f5e9,stroke:#43a047,stroke-width:2px,color:#1b5e20;
-    classDef output fill:#fff8e1,stroke:#ffb300,stroke-width:2px,color:#7f5f00;
-    classDef database fill:#ede7f6,stroke:#5e35b1,stroke-width:2px,color:#311b92;
+    %% Định nghĩa phong cách tối giản, chuyên nghiệp
+    classDef step fill:#ffffff,stroke:#e2e8f0,stroke-width:2px,color:#0f172a;
+    classDef active fill:#eff6ff,stroke:#2563eb,stroke-width:2px,color:#1e40af;
+    classDef success fill:#ecfdf5,stroke:#059669,stroke-width:2px,color:#065f46;
 
-    %% 1. Nguồn Tri Thức & RAG
-    subgraph S1["1. HỆ THỐNG TRI THỨC NGUỒN (RAG)"]
-        A["Quy chuẩn Bài đọc Storytelling"]:::source
-        B["Giáo án & Giáo trình môn học"]:::source
-        A & B -->|Vector hóa| C[(ChromaDB Vector Store)]:::database
-    end
+    %% Các nút của sơ đồ đơn giản
+    A["1. NGUỒN TRI THỨC (ChromaDB RAG)\nNạp quy chuẩn bài đọc & Giáo trình chuyên môn"]:::step
+    B["2. NHẬP YÊU CẦU\nGiảng viên điền chủ đề + Môn học"]:::step
+    C["3. AI AGENT LẬP LUẬN (ReAct Engine)\nTruy vấn tri thức & Thiết kế Bài đọc Storytelling"]:::active
+    D{"4. KIỂM DUYỆT CHẤT LƯỢNG KÉP\nValidator cấu trúc & LLM Trưởng bộ môn duyệt"}:::active
+    E["5. XUẤT BẢN THÀNH PHẨM\nĐóng gói file Markdown sạch & JSON API"]:::success
 
-    %% 2. Tiếp nhận Yêu cầu
-    subgraph S2["2. TIẾP NHẬN YÊU CẦU BÀI ĐỌC"]
-        D["Yêu cầu viết Bài đọc Storytelling\n(Chủ đề + Môn học)"]:::source
-        D --> E["Định tuyến xử lý: Soạn thảo BÀI ĐỌC"]:::agent
-    end
-
-    %% 3. Bộ Não Xử Lý AI Agent
-    subgraph S3["3. BỘ NÃO LẬP LUẬN TỰ TRỊ (ReAct Engine)"]
-        C -->|Lọc Metadata theo Môn học| H["AI Agent Core"]:::agent
-        E --> H
-        H -->|Tự suy luận & Nạp bối cảnh| I["Khởi tạo Draft JSON Bài đọc\n(Đủ 7 phần La Mã)"]:::agent
-    end
-
-    %% 4. Kiểm Duyệt Bài Đọc & Tự Sửa Sai
-    subgraph S4["4. KIỂM DUYỆT BÀI ĐỌC CHẶT CHẼ"]
-        I --> J{"Tầng 1: Kiểm duyệt Cấu trúc\n(Đủ 7 khóa _tieu_de & _noi_dung)"}:::check
-        
-        %% Check Bài đọc
-        J -->|Khớp cấu trúc| K{"Tầng 2: Kiểm duyệt Nghiệp vụ\n(LLM Supervisor)"}:::check
-        
-        %% Luồng từ chối
-        J -->|Thiếu phần / Lỗi cấu trúc| L["Báo cáo lỗi cấu trúc/nội dung"]:::check
-        K -->|"REJECTED (Thiếu Storytelling/Lỗi code)"| L
-        L -->|Self-Correction Loop| H
-        
-        %% Phê duyệt
-        K -->|APPROVED| M["Đóng gói & Xuất bản"]:::check
-    end
-
-    %% 5. Thành phẩm
-    subgraph S5["5. ĐÓNG GÓI THÀNH PHẨM"]
-        M --> N["File Markdown (7 phần La Mã, Sạch Emoji)"]:::output
-        M --> O["File JSON (Ready-to-sync API)"]:::output
-    end
+    %% Đường kết nối
+    A --> C
+    B --> C
+    C --> D
+    D -->|APPROVED| E
+    D -.->|"REJECTED (Tự sửa sai)"| C
 ```
 
 ---
