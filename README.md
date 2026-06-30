@@ -26,22 +26,43 @@ Hệ thống hỗ trợ song hành hai chức năng cốt lõi:
 ## Sơ đồ luồng thực thi hệ thống
 
 ```mermaid
-graph TD
-    A[Chạy main.py] --> B[Đồng bộ tri thức từ inputs/ sang ChromaDB]
-    B --> C[Nhận yêu cầu: chủ đề và môn học từ sys.argv]
-    C --> D{Nhận diện Ý định?}
-    D -- Chứa 'bài đọc' / 'reading' --> E[Kích hoạt Agent Soạn Bài Đọc]
-    D -- Mặc định khác --> F[Kích hoạt Agent Soạn Bài Tập]
-    E --> G[RAG tri thức của môn học tương ứng]
-    F --> G
-    G --> H[Agent sinh dữ liệu nháp dạng JSON]
-    H --> I[Vòng lặp kiểm duyệt: Programmatic Validation]
-    I -- Thất bại --> J[Agent nhận feedback lỗi & Tự sửa đổi ReAct]
-    J --> H
-    I -- Thành công --> K[LLM Trưởng bộ môn kiểm định sâu - Supervisor]
-    K -- REJECTED --> J
-    K -- APPROVED --> L[Đóng gói xuất bản Markdown La Mã/Phân cấp & JSON thô]
-    L --> M[Hoàn thành xuất bản ra data/outputs/]
+flowchart TB
+    %% Subgraph 1: Tri thức nguồn
+    subgraph RAG_Source["1. NGUỒN TRI THỨC (Local RAG)"]
+        TC["Quy chuẩn Học liệu\n(Tieu_Chuan/)"]
+        GA["Giáo án & Giáo trình\n(Giao_An/)"]
+        TC & GA --> |Đồng bộ hóa| DB[(Vector DB: ChromaDB)]
+    end
+
+    %% Subgraph 2: Khối xử lý trung tâm
+    subgraph Agent_Core["2. BỘ NÃO XỬ LÝ (AI Agent Engine)"]
+        Req["Yêu cầu: Chủ đề + Môn học\n(Bài tập / Bài đọc)"] --> Agent["AI Agent tự trị"]
+        DB --> |Truy vấn ngữ cảnh| Agent
+        Agent --> |Thiết kế nháp| Draft["Draft Học liệu (JSON)"]
+    end
+
+    %% Subgraph 3: Kiểm duyệt kép
+    subgraph Quality_Gate["3. CỔNG KIỂM DUYỆT CHẤT LƯỢNG KÉP"]
+        Draft --> Gate1{"Kiểm duyệt Cứng\n(Python Validator)"}
+        Gate1 --> |Vượt qua| Gate2{"Kiểm duyệt Mềm\n(LLM Supervisor)"}
+        Gate2 --> | APPROVED | Publish["Đóng gói xuất bản"]
+        
+        %% Luồng tự sửa sai
+        Gate1 --> |Không đạt| Feedback["Phản hồi lỗi chi tiết"]
+        Gate2 --> | REJECTED | Feedback
+        Feedback --> |Tự động sửa lỗi| Agent
+    end
+
+    %% Subgraph 4: Thành phẩm
+    subgraph Deliverables["4. SẢN PHẨM ĐẦU RA"]
+        Publish --> MD["Markdown Giáo án đẹp\n(data/outputs/markdown/)"]
+        Publish --> JSON["JSON thô để đồng bộ\n(data/outputs/raw_json/)"]
+    end
+
+    style RAG_Source fill:#f0f8ff,stroke:#0055ff,stroke-width:1.5px
+    style Agent_Core fill:#fff0f5,stroke:#ff00bb,stroke-width:1.5px
+    style Quality_Gate fill:#f0fff0,stroke:#00aa00,stroke-width:1.5px
+    style Deliverables fill:#fffae6,stroke:#ffaa00,stroke-width:1.5px
 ```
 
 ---
