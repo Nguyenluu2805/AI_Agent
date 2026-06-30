@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ thống hỗ trợ đào tạo - Rikkei Academy</title>
+    <title>EduCraft AI - Hệ thống hỗ trợ biên soạn học liệu</title>
     <!-- Nhúng Google Font Outfit (Heading) và Inter (Body) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,20 +11,20 @@
     
     <style>
         :root {
-            --bg-base: #06070a;
-            --bg-surface: #0c0e17;
-            --bg-panel: rgba(16, 18, 30, 0.45);
-            --border-color: rgba(255, 255, 255, 0.05);
-            --border-hover: rgba(255, 255, 255, 0.1);
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --text-muted: #64748b;
-            --primary: #3b82f6;
-            --primary-glow: rgba(59, 130, 246, 0.15);
-            --accent: #8b5cf6;
-            --accent-glow: rgba(139, 92, 246, 0.15);
-            --success: #10b981;
-            --error: #f43f5e;
+            --bg-base: #f8fafc; /* Slate 50 */
+            --bg-surface: #ffffff;
+            --bg-panel: #ffffff;
+            --border-color: #e2e8f0; /* Slate 200 */
+            --border-hover: #cbd5e1;
+            --text-primary: #0f172a; /* Slate 900 */
+            --text-secondary: #475569; /* Slate 600 */
+            --text-muted: #94a3b8; /* Slate 400 */
+            --primary: #2563eb; /* Blue 600 */
+            --primary-glow: rgba(37, 99, 235, 0.08);
+            --accent: #7c3aed; /* Violet 600 */
+            --accent-glow: rgba(124, 58, 237, 0.08);
+            --success: #059669; /* Emerald 600 */
+            --error: #dc2626; /* Red 600 */
             --font-sans: 'Inter', sans-serif;
             --font-display: 'Outfit', sans-serif;
             --font-mono: 'JetBrains Mono', monospace;
@@ -57,11 +57,11 @@
             background: transparent;
         }
         ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(0, 0, 0, 0.08);
             border-radius: 99px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.16);
+            background: rgba(0, 0, 0, 0.16);
         }
 
         /* --------------------- SIDEBAR --------------------- */
@@ -87,19 +87,10 @@
             font-family: var(--font-display);
             font-size: 21px;
             font-weight: 700;
-            background: linear-gradient(135deg, #60a5fa, #c084fc);
+            background: linear-gradient(135deg, var(--primary), var(--accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             letter-spacing: -0.02em;
-        }
-
-        .logo-sub {
-            font-family: var(--font-sans);
-            font-size: 10px;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
         }
 
         /* Khung tìm kiếm sidebar */
@@ -122,7 +113,7 @@
         .search-history {
             width: 100%;
             padding: 10px 12px 10px 34px;
-            background: rgba(255, 255, 255, 0.02);
+            background: #f8fafc;
             border: 1px solid var(--border-color);
             border-radius: 8px;
             color: var(--text-primary);
@@ -134,7 +125,7 @@
 
         .search-history:focus {
             border-color: var(--primary);
-            background: rgba(255, 255, 255, 0.04);
+            background: var(--bg-surface);
             box-shadow: 0 0 0 3px var(--primary-glow);
         }
 
@@ -159,7 +150,7 @@
         }
 
         .history-item {
-            background: rgba(255, 255, 255, 0.01);
+            background: var(--bg-surface);
             border: 1px solid var(--border-color);
             padding: 12px 14px;
             border-radius: 8px;
@@ -172,14 +163,13 @@
 
         .history-item:hover {
             border-color: var(--border-hover);
-            background: rgba(255, 255, 255, 0.03);
+            background: #f8fafc;
             transform: translateY(-1px);
         }
 
         .history-item.active {
-            border-color: rgba(59, 130, 246, 0.4);
-            background: rgba(59, 130, 246, 0.06);
-            box-shadow: inset 0 0 12px rgba(59, 130, 246, 0.05);
+            border-color: rgba(37, 99, 235, 0.4);
+            background: rgba(37, 99, 235, 0.04);
         }
 
         .history-name {
@@ -196,8 +186,8 @@
         }
 
         .history-badge {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.03);
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
             color: var(--text-secondary);
             padding: 2px 6px;
             border-radius: 4px;
@@ -208,9 +198,9 @@
         }
 
         .history-item.active .history-badge {
-            background: rgba(59, 130, 246, 0.15);
-            border-color: rgba(59, 130, 246, 0.1);
-            color: #93c5fd;
+            background: rgba(37, 99, 235, 0.1);
+            border-color: rgba(37, 99, 235, 0.05);
+            color: var(--primary);
         }
 
         /* --------------------- MAIN WORKSPACE --------------------- */
@@ -219,8 +209,8 @@
             flex-direction: column;
             height: 100vh;
             overflow: hidden;
-            background: radial-gradient(circle at 80% 0%, rgba(59, 130, 246, 0.05), transparent 50%),
-                        radial-gradient(circle at 20% 100%, rgba(139, 92, 246, 0.04), transparent 50%);
+            background: radial-gradient(circle at 80% 0%, rgba(37, 99, 235, 0.03), transparent 50%),
+                        radial-gradient(circle at 20% 100%, rgba(124, 58, 237, 0.02), transparent 50%);
         }
 
         /* HEADER */
@@ -231,7 +221,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(6, 7, 10, 0.4);
+            background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(12px);
         }
 
@@ -257,7 +247,7 @@
         }
 
         .btn-action {
-            background: rgba(255, 255, 255, 0.03);
+            background: #ffffff;
             border: 1px solid var(--border-color);
             color: var(--text-secondary);
             padding: 6px 14px;
@@ -275,7 +265,7 @@
         .btn-action:hover {
             color: var(--text-primary);
             border-color: var(--border-hover);
-            background: rgba(255, 255, 255, 0.06);
+            background: #f8fafc;
         }
 
         .btn-action.primary {
@@ -285,7 +275,7 @@
         }
 
         .btn-action.primary:hover {
-            background: #2563eb;
+            background: #1d4ed8;
             box-shadow: 0 0 12px var(--primary-glow);
         }
 
@@ -307,11 +297,11 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
         }
 
         .viewer-header {
-            background: rgba(255, 255, 255, 0.01);
+            background: rgba(0, 0, 0, 0.005);
             border-bottom: 1px solid var(--border-color);
             padding: 10px 16px;
             display: flex;
@@ -321,10 +311,10 @@
 
         .viewer-tabs {
             display: flex;
-            background: rgba(255, 255, 255, 0.02);
+            background: #f1f5f9;
             padding: 3px;
             border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
         }
 
         .tab-btn {
@@ -345,9 +335,9 @@
         }
 
         .tab-btn.active {
-            color: white;
-            background: rgba(255, 255, 255, 0.06);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            color: var(--text-primary);
+            background: #ffffff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
         .viewer-content {
@@ -366,13 +356,14 @@
             font-weight: 700;
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 10px;
+            color: var(--text-primary);
         }
         .markdown-rendered h2 {
             font-family: var(--font-display);
             font-size: 16px;
             margin: 24px 0 12px 0;
             font-weight: 600;
-            color: #60a5fa;
+            color: var(--primary);
             letter-spacing: -0.01em;
         }
         .markdown-rendered h3 {
@@ -380,17 +371,18 @@
             font-size: 14px;
             margin: 16px 0 8px 0;
             font-weight: 600;
+            color: var(--text-primary);
         }
         .markdown-rendered p {
             font-size: 13.5px;
             margin-bottom: 14px;
-            color: #cbd5e1;
+            color: #334155; /* Slate 700 */
         }
         .markdown-rendered ul, .markdown-rendered ol {
             margin-left: 18px;
             margin-bottom: 14px;
             font-size: 13.5px;
-            color: #cbd5e1;
+            color: #334155;
         }
         .markdown-rendered li {
             margin-bottom: 6px;
@@ -401,7 +393,7 @@
             margin: 20px 0;
         }
         .markdown-rendered pre {
-            background: rgba(0, 0, 0, 0.25) !important;
+            background: #f8fafc !important; /* Soft light background */
             border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 14px 18px;
@@ -409,20 +401,21 @@
             margin: 14px 0;
             font-family: var(--font-mono);
             font-size: 12.5px;
+            color: #0f172a;
         }
         .markdown-rendered code {
             font-family: var(--font-mono);
             font-size: 12px;
-            background: rgba(255, 255, 255, 0.04);
+            background: #f1f5f9;
             padding: 2px 5px;
             border-radius: 4px;
-            color: #f3f4f6;
+            color: #0f172a;
         }
 
         .raw-json-pre {
             font-family: var(--font-mono);
             font-size: 12.5px;
-            color: #e2e8f0;
+            color: #334155;
             white-space: pre-wrap;
             word-break: break-all;
         }
@@ -433,17 +426,17 @@
 
         /* --------------------- CONSOLE MONITOR --------------------- */
         .console-card {
-            background: rgba(6, 7, 10, 0.6);
+            background: #ffffff;
             border: 1px solid var(--border-color);
             border-radius: 12px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
         }
 
         .console-header {
-            background: rgba(255, 255, 255, 0.01);
+            background: #ffffff;
             border-bottom: 1px solid var(--border-color);
             padding: 12px 18px;
             display: flex;
@@ -463,11 +456,11 @@
         .timer-badge {
             font-size: 11px;
             font-family: var(--font-mono);
-            background: rgba(255, 255, 255, 0.03);
+            background: #f1f5f9;
             border: 1px solid var(--border-color);
             padding: 3px 8px;
             border-radius: 4px;
-            color: var(--text-muted);
+            color: var(--text-secondary);
         }
 
         .console-body {
@@ -549,7 +542,7 @@
         .interaction-area {
             border-top: 1px solid var(--border-color);
             padding: 20px 32px 28px 32px;
-            background: rgba(6, 7, 10, 0.4);
+            background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(12px);
             display: flex;
             flex-direction: column;
@@ -564,7 +557,7 @@
         }
 
         .suggestion-pill {
-            background: rgba(255, 255, 255, 0.02);
+            background: #ffffff;
             border: 1px solid var(--border-color);
             padding: 6px 14px;
             border-radius: 99px;
@@ -575,14 +568,14 @@
         }
 
         .suggestion-pill:hover {
-            color: var(--text-primary);
+            color: var(--primary);
             border-color: var(--primary);
-            background: rgba(59, 130, 246, 0.08);
+            background: rgba(37, 99, 235, 0.04);
         }
 
         /* Ô nhập văn bản dạng Claude chatbox */
         .chatbox-container {
-            background: rgba(255, 255, 255, 0.01);
+            background: #ffffff;
             border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 12px 16px;
@@ -590,12 +583,13 @@
             flex-direction: column;
             gap: 10px;
             transition: var(--transition-smooth);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
         }
 
         .chatbox-container:focus-within {
-            border-color: rgba(59, 130, 246, 0.4);
-            box-shadow: 0 0 0 4px var(--primary-glow);
-            background: rgba(255, 255, 255, 0.02);
+            border-color: rgba(37, 99, 235, 0.4);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+            background: #ffffff;
         }
 
         .input-prompt {
@@ -632,7 +626,7 @@
             font-weight: 600;
             cursor: pointer;
             transition: var(--transition-smooth);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
             display: flex;
             align-items: center;
             gap: 6px;
@@ -640,11 +634,11 @@
 
         .btn-generate:hover {
             transform: translateY(-1px);
-            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.35);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);
         }
 
         .btn-generate:disabled {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(0, 0, 0, 0.05);
             color: var(--text-muted);
             box-shadow: none;
             cursor: not-allowed;
@@ -662,8 +656,7 @@
     <!-- SIDEBAR: LỊCH SỬ HỌC LIỆU -->
     <aside>
         <div class="logo-section">
-            <span class="logo-title">Rikkei AI</span>
-            <span class="logo-sub">Hỗ Trợ Đào Tạo</span>
+            <span class="logo-title">EduCraft AI</span>
         </div>
         
         <div class="search-container">
