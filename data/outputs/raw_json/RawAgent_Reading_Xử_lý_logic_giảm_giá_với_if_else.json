@@ -1,0 +1,21 @@
+{
+    "subject": "java",
+    "chu_de": "Xử lý logic giảm giá với if-else",
+    "dat_van_de_tieu_de": "Rika Shopee áp dụng chương trình khuyến mãi",
+    "dat_van_de_noi_dung": "Shopee cần xử lý hai loại mã giảm giá:\n- DEAL0D: Giảm giá 100% cho đơn hàng >= 200k\n- SALE100K: Giảm 100.000đ cho đơn hàng >= 200k.\nHãy giúp Rika viết chương trình Java để xử lý logic giảm giá này! ",
+    "phan_tich_tieu_de": "Phân tích nhu cầu và lập luận giải pháp",
+    "phan_tich_noi_dung": "Rika cần sử dụng câu lệnh if-else để kiểm tra điều kiện đơn hàng và mã giảm giá. Câu lệnh sẽ tính toán tổng tiền phải trả sau khi áp dụng khuyến mãi.",
+    "gioi_thieu_giai_phap_tieu_de": "Giới thiệu cú pháp và logic if-else",
+    "gioi_thieu_giai_phap_noi_dung": "Cú pháp if-else trong Java:\nif (điều kiện) {\n  // Code thực hiện nếu điều kiện đúng\n} else {\n // Code thực hiện nếu điều kiện sai\n}",
+    "vi_du_minh_hoa_tieu_de": "Ví dụ minh họa chương trình xử lý giảm giá",
+    "vi_du_minh_hoa_noi_dung": "```java\npublic class DiscountCalculation {\n    public static void main(String[] args) {\n        double orderValue = 250000;\n        String voucher = \"SALE100K\";\n\n        if (orderValue >= 200000 && voucher.equals(\"SALE100K\")) {\n            double payment = orderValue - 100000;\n            System.out.println(\"Bạn được giảm 100.000đ. Số tiền cần trả: \" + payment);\n        } else if (orderValue >= 200000 && voucher.equals(\"DEAL0D\")) {\n            double payment = 0;\n            System.out.println(\"Chúc mừng! Bạn được giảm giá 0đ thanh toán.\");\n        } \n    }\n}\n```",
+    "giai_quyet_van_de_tieu_de": "Áp dụng chương trình vào trường hợp thực tế",
+    "giai_quyet_van_de_noi_dung": "Bạn có thể thay đổi giá trị `orderValue` và `voucher` để kiểm tra kết quả tính toán.",
+    "tong_ket_luu_y_tieu_de": "Tổng kết kiến thức và lưu ý",
+    "tong_ket_luu_y_noi_dung": "Câu lệnh if-else là công cụ hữu hiệu cho việc xử lý logic phức tạp. Hãy chú ý đến thứ tự thực thi các điều kiện và cách sử dụng phương thức `equals()` để so sánh chuỗi.",
+    "bo_cau_hoi_kiem_tra": [
+        "Câu 1: Giải thích tại sao Rika cần sử dụng câu lệnh if-else trong chương trình của mình.",
+        "Câu 2: Tìm lỗi trong đoạn code sau và đề xuất cách sửa chữa.\n```java\nif (orderValue >= 200000) {\n            payment = orderValue - 100000;\n            System.out.println(\"Bạn được giảm 100.000đ. Số tiền cần trả: \" + payment);\n} else {\n            // Code xử lý trường hợp không áp dụng khuyến mãi\n}\n```",
+        "Câu 3: Xét tình huống `orderValue` là 150000 và `voucher` là \"SALE100K\". Hãy phân tích logic chương trình và cho biết giá trị `payment` sẽ bằng bao nhiêu?"
+    ]
+}
