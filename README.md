@@ -36,36 +36,34 @@ flowchart TD
 
     %% 1. Nguồn Tri Thức & RAG
     subgraph S1["1. HỆ THỐNG TRI THỨC NGUỒN (RAG)"]
-        A["Quy chuẩn thiết kế học liệu"]:::source
-        B["Giáo án & Giáo trình chuyên môn"]:::source
+        A["Quy chuẩn Bài đọc Storytelling"]:::source
+        B["Giáo án & Giáo trình môn học"]:::source
         A & B -->|Vector hóa| C[(ChromaDB Vector Store)]:::database
     end
 
-    %% 2. Tiếp nhận & Định tuyến ý định
-    subgraph S2["2. TIẾP NHẬN & PHÂN LOẠI Ý ĐỊNH"]
-        D["Yêu cầu từ Giảng viên\n(Prompt hoặc Paste nội dung)"]:::source
-        D --> E{Nhận diện Ý định?}:::agent
-        E -->|"Chứa từ khóa 'Bài đọc/Reading'"| F["Định tuyến: Thiết kế BÀI ĐỌC"]:::agent
-        E -->|Mặc định khác| G["Định tuyến: Thiết kế BÀI TẬP"]:::agent
+    %% 2. Tiếp nhận Yêu cầu
+    subgraph S2["2. TIẾP NHẬN YÊU CẦU BÀI ĐỌC"]
+        D["Yêu cầu viết Bài đọc Storytelling\n(Chủ đề + Môn học)"]:::source
+        D --> E["Định tuyến xử lý: Soạn thảo BÀI ĐỌC"]:::agent
     end
 
     %% 3. Bộ Não Xử Lý AI Agent
     subgraph S3["3. BỘ NÃO LẬP LUẬN TỰ TRỊ (ReAct Engine)"]
         C -->|Lọc Metadata theo Môn học| H["AI Agent Core"]:::agent
-        F & G --> H
-        H -->|Tự suy luận & Nạp bối cảnh| I["Khởi tạo Draft JSON học liệu"]:::agent
+        E --> H
+        H -->|Tự suy luận & Nạp bối cảnh| I["Khởi tạo Draft JSON Bài đọc\n(Đủ 7 phần La Mã)"]:::agent
     end
 
-    %% 4. Cổng Kiểm Duyệt Kép & Tự Sửa Sai
-    subgraph S4["4. CỔNG KIỂM DUYỆT CHẤT LƯỢNG KÉP"]
-        I --> J{"Tầng 1: Kiểm duyệt Cứng\n(Python Validator)"}:::check
+    %% 4. Kiểm Duyệt Bài Đọc & Tự Sửa Sai
+    subgraph S4["4. KIỂM DUYỆT BÀI ĐỌC CHẶT CHẼ"]
+        I --> J{"Tầng 1: Kiểm duyệt Cấu trúc\n(Đủ 7 khóa _tieu_de & _noi_dung)"}:::check
         
-        %% Check Bài tập / Bài đọc
-        J -->|Đạt chuẩn cấu trúc| K{"Tầng 2: Kiểm duyệt Mềm\n(LLM Supervisor)"}:::check
+        %% Check Bài đọc
+        J -->|Khớp cấu trúc| K{"Tầng 2: Kiểm duyệt Nghiệp vụ\n(LLM Supervisor)"}:::check
         
         %% Luồng từ chối
-        J -->|Sai cấu trúc / Thiếu phần| L["Báo cáo lỗi chi tiết"]:::check
-        K -->|"REJECTED (Sai nghiệp vụ)"| L
+        J -->|Thiếu phần / Lỗi cấu trúc| L["Báo cáo lỗi cấu trúc/nội dung"]:::check
+        K -->|"REJECTED (Thiếu Storytelling/Lỗi code)"| L
         L -->|Self-Correction Loop| H
         
         %% Phê duyệt
@@ -73,9 +71,9 @@ flowchart TD
     end
 
     %% 5. Thành phẩm
-    subgraph S5["5. ĐÓNG GÓI THÀNH PHẨM DƯỚI THƯ MỤC OUTPUTS"]
-        M --> N["File Markdown (Định dạng đẹp, Sạch Emoji)"]:::output
-        M --> O["File JSON (Ready-to-sync API Rikkei Portal)"]:::output
+    subgraph S5["5. ĐÓNG GÓI THÀNH PHẨM"]
+        M --> N["File Markdown (7 phần La Mã, Sạch Emoji)"]:::output
+        M --> O["File JSON (Ready-to-sync API)"]:::output
     end
 ```
 
