@@ -2,10 +2,37 @@ import os
 import sys
 import glob
 import re
+import threading
+import uuid
 from flask import Flask, render_template, request, jsonify, send_from_directory
 from src.database.chroma_client import RikkeiChromaClient
 from src.agents.rikkei_agent import RikkeiAgent
 from src import config
+
+# Quản lý tiến trình tác vụ bất đồng bộ
+tasks_progress = {}
+tasks_lock = threading.Lock()
+thread_local = threading.local()
+
+class ThreadLocalStdout:
+    def __init__(self, original_stdout, tasks_progress):
+        self.original_stdout = original_stdout
+        self.tasks_progress = tasks_progress
+
+    def write(self, string):
+        self.original_stdout.write(string)
+        if string.strip():
+            task_id = getattr(thread_local, 'task_id', None)
+            if task_id:
+                with tasks_lock:
+                    if task_id in self.tasks_progress:
+                        self.tasks_progress[task_id]["logs"].append(string.strip())
+
+    def flush(self):
+        self.original_stdout.flush()
+
+# Chuyển hướng stdout để chụp logs theo từng thread
+sys.stdout = ThreadLocalStdout(sys.stdout, tasks_progress)
 
 app = Flask(__name__, template_folder='templates', static_folder='templates')
 
@@ -94,45 +121,92 @@ def generate_material():
         if not prompt:
             return jsonify({"status": "error", "message": "Yeu cau (prompt) khong duoc de trong"}), 400
             
-        # Lưu thời gian bắt đầu chạy để tìm file sinh mới
-        import time
-        start_time = time.time() - 2 # Trừ hao 2 giây
+        task_id = str(uuid.uuid4())
         
-        print(f"[Web Backend] Dang thuc thi Agent voi yeu cau: '{prompt}'")
-        agent_response = agent.run_agent(prompt)
-        
-        # Tìm file Markdown sinh mới nhất
-        md_files = glob.glob(os.path.join(config.OUTPUT_MD_DIR, "*.md"))
-        md_content = ""
-        md_name = ""
-        
-        if md_files:
-            latest_md = max(md_files, key=os.path.getmtime)
-            # Kiểm tra xem file này được sinh ra sau lúc bắt đầu chạy không
-            if os.path.getmtime(latest_md) >= start_time:
-                md_name = os.path.basename(latest_md)
-                with open(latest_md, "r", encoding="utf-8") as f:
-                    md_content = f.read()
+        with tasks_lock:
+            tasks_progress[task_id] = {
+                "status": "processing",
+                "logs": [],
+                "result": None,
+                "error_message": None
+            }
+            
+        def run_task(tid, user_prompt):
+            thread_local.task_id = tid
+            import time
+            start_time = time.time() - 2
+            try:
+                print(f"[Web Backend] Khoi chay Agent voi yeu cau: '{user_prompt}'")
+                agent_response = agent.run_agent(user_prompt)
+                
+                # Tìm file Markdown sinh mới nhất
+                md_files = glob.glob(os.path.join(config.OUTPUT_MD_DIR, "*.md"))
+                md_content = ""
+                md_name = ""
+                if md_files:
+                    latest_md = max(md_files, key=os.path.getmtime)
+                    if os.path.getmtime(latest_md) >= start_time:
+                        md_name = os.path.basename(latest_md)
+                        with open(latest_md, "r", encoding="utf-8") as f:
+                            md_content = f.read()
+                            
+                # Tìm file JSON sinh mới nhất
+                json_files = glob.glob(os.path.join(config.OUTPUT_JSON_DIR, "*.json"))
+                json_content = ""
+                json_name = ""
+                if json_files:
+                    latest_json = max(json_files, key=os.path.getmtime)
+                    if os.path.getmtime(latest_json) >= start_time:
+                        json_name = os.path.basename(latest_json)
+                        with open(latest_json, "r", encoding="utf-8") as f:
+                            json_content = f.read()
+                            
+                with tasks_lock:
+                    tasks_progress[tid]["result"] = {
+                        "agent_response": agent_response,
+                        "markdown_name": md_name,
+                        "markdown_content": md_content,
+                        "json_name": json_name,
+                        "json_content": json_content
+                    }
+                    tasks_progress[tid]["status"] = "success"
                     
-        # Tìm file JSON sinh mới nhất
-        json_files = glob.glob(os.path.join(config.OUTPUT_JSON_DIR, "*.json"))
-        json_content = ""
-        json_name = ""
-        if json_files:
-            latest_json = max(json_files, key=os.path.getmtime)
-            if os.path.getmtime(latest_json) >= start_time:
-                json_name = os.path.basename(latest_json)
-                with open(latest_json, "r", encoding="utf-8") as f:
-                    json_content = f.read()
-                    
+            except Exception as ex:
+                print(f"[Loi He Thong] Gap su co khi chay Agent: {ex}")
+                with tasks_lock:
+                    tasks_progress[tid]["status"] = "error"
+                    tasks_progress[tid]["error_message"] = str(ex)
+        
+        t = threading.Thread(target=run_task, args=(task_id, prompt))
+        t.daemon = True
+        t.start()
+        
         return jsonify({
-            "status": "success",
-            "agent_response": agent_response,
-            "markdown_name": md_name,
-            "markdown_content": md_content,
-            "json_name": json_name,
-            "json_content": json_content
+            "status": "processing",
+            "task_id": task_id
         })
+        
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/api/status', methods=['GET'])
+def get_task_status():
+    try:
+        task_id = request.args.get('task_id')
+        if not task_id:
+            return jsonify({"status": "error", "message": "Thieu tham so task_id"}), 400
+            
+        with tasks_lock:
+            if task_id not in tasks_progress:
+                return jsonify({"status": "error", "message": "Task ID khong ton tai"}), 404
+            
+            task_info = tasks_progress[task_id]
+            return jsonify({
+                "status": task_info["status"],
+                "logs": task_info["logs"],
+                "result": task_info["result"],
+                "error_message": task_info["error_message"]
+            })
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 

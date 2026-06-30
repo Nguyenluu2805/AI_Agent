@@ -988,6 +988,79 @@
             }
         });
 
+        let displayedLogCount = 0;
+
+        function pollTaskStatus(taskId) {
+            displayedLogCount = 0;
+            const intervalId = setInterval(async () => {
+                try {
+                    const res = await fetch(`/api/status?task_id=${taskId}`);
+                    const data = await res.json();
+                    
+                    // Thêm logs mới chưa được hiển thị
+                    if (data.logs && data.logs.length > displayedLogCount) {
+                        for (let i = displayedLogCount; i < data.logs.length; i++) {
+                            const rawLog = data.logs[i];
+                            let logType = '';
+                            if (rawLog.includes('APPROVED') || rawLog.includes('thành công') || rawLog.includes('hoàn tất') || rawLog.includes('Hoan thanh')) {
+                                logType = 'success';
+                            } else if (rawLog.includes('Loi') || rawLog.includes('REJECTED') || rawLog.includes('THAT BAI')) {
+                                logType = 'error';
+                            } else if (rawLog.includes('Dang suy nghi') || rawLog.includes('Tiến hành') || rawLog.includes('đang suy nghĩ')) {
+                                logType = 'active';
+                            }
+                            addLog(rawLog, logType);
+                        }
+                        displayedLogCount = data.logs.length;
+                    }
+                    
+                    if (data.status === 'success') {
+                        clearInterval(intervalId);
+                        stopTimer();
+                        
+                        const result = data.result;
+                        addLog(`Hệ thống EduCraft AI hoàn thành lập luận thành công!`, 'success');
+                        
+                        currentMarkdown = result.markdown_content;
+                        currentJson = result.json_content;
+                        
+                        const cleanName = result.markdown_name
+                            .replace('GiaoAnStandard_', '')
+                            .replace('Reading_', '')
+                            .replace('.md', '')
+                            .replace(/_/g, ' ');
+                        activeFileTitle.textContent = cleanName;
+                        
+                        renderMarkdownHTML(currentMarkdown);
+                        jsonContent.textContent = JSON.stringify(JSON.parse(currentJson), null, 2);
+                        
+                        await loadHistory();
+                        
+                        setTimeout(() => {
+                            const firstItem = historyList.querySelector('.history-item');
+                            if (firstItem) firstItem.classList.add('active');
+                        }, 500);
+                        
+                        btnGenerate.disabled = false;
+                        promptInput.disabled = false;
+                        
+                    } else if (data.status === 'error') {
+                        clearInterval(intervalId);
+                        stopTimer();
+                        addLog(`Tác vụ thất bại: ${data.error_message}`, 'error');
+                        btnGenerate.disabled = false;
+                        promptInput.disabled = false;
+                    }
+                } catch (err) {
+                    clearInterval(intervalId);
+                    stopTimer();
+                    addLog(`Lỗi kết nối máy chủ khi theo dõi tiến trình: ${err.message}`, 'error');
+                    btnGenerate.disabled = false;
+                    promptInput.disabled = false;
+                }
+            }, 2000);
+        }
+
         // KÍCH HOẠT BIÊN SOẠN
         btnGenerate.addEventListener('click', async () => {
             const prompt = promptInput.value.trim();
@@ -1012,7 +1085,7 @@
                 addLog(`Đồng bộ bộ nhớ dài hạn ChromaDB hoàn tất!`, 'success');
                 addLog(`Kích hoạt trí tuệ nhân tạo AI (Mô hình: Gemma2)...`, 'active');
                 addLog(`Đang gửi yêu cầu xử lý: "${prompt}"`, 'active');
-                addLog(`AI đang suy nghĩ và thiết lập bối cảnh RAG... (Quá trình này mất khoảng 1-2 phút)...`, 'active');
+                addLog(`Tác vụ bất đồng bộ được khởi tạo trên nền hệ thống...`, 'active');
             }, 1000);
 
             try {
@@ -1023,44 +1096,19 @@
                 });
                 
                 const data = await res.json();
-                stopTimer();
-
-                if (data.status === 'success') {
-                    addLog(`AI hoàn thành lập luận.`, 'success');
-                    addLog(`Bộ kiểm duyệt Programmatic Validation: APPROVED!`, 'success');
-                    addLog(`LLM Supervisor (Trưởng bộ môn): APPROVED!`, 'success');
-                    addLog(`Đóng gói xuất bản thành công!`, 'success');
-                    
-                    currentMarkdown = data.markdown_content;
-                    currentJson = data.json_content;
-                    
-                    const cleanName = data.markdown_name
-                        .replace('GiaoAnStandard_', '')
-                        .replace('Reading_', '')
-                        .replace('.md', '')
-                        .replace(/_/g, ' ');
-                    activeFileTitle.textContent = cleanName;
-                    
-                    // Render
-                    renderMarkdownHTML(currentMarkdown);
-                    jsonContent.textContent = JSON.stringify(JSON.parse(currentJson), null, 2);
-                    
-                    // Load lại lịch sử
-                    await loadHistory();
-                    
-                    // Active file vừa tạo
-                    setTimeout(() => {
-                        const firstItem = historyList.querySelector('.history-item');
-                        if (firstItem) firstItem.classList.add('active');
-                    }, 500);
-
+                
+                if (data.status === 'processing') {
+                    const taskId = data.task_id;
+                    pollTaskStatus(taskId);
                 } else {
-                    addLog(`Lỗi xử lý của AI: ${data.message}`, 'error');
+                    stopTimer();
+                    addLog(`Lỗi khởi tạo tác vụ: ${data.message}`, 'error');
+                    btnGenerate.disabled = false;
+                    promptInput.disabled = false;
                 }
             } catch (err) {
                 stopTimer();
                 addLog(`Thất bại khi kết nối máy chủ Flask: ${err.message}`, 'error');
-            } finally {
                 btnGenerate.disabled = false;
                 promptInput.disabled = false;
             }
