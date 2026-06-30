@@ -4,6 +4,7 @@ import glob
 import re
 import threading
 import uuid
+# pyrefly: ignore [missing-import]
 from flask import Flask, render_template, request, jsonify, send_from_directory
 from src.database.chroma_client import RikkeiChromaClient
 from src.agents.rikkei_agent import RikkeiAgent
@@ -48,6 +49,10 @@ print("[Web Backend] Dong bo hoan tat. San sang phuc vu!")
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/homework')
+def homework_view():
+    return render_template('homework.html')
 
 @app.route('/api/history', methods=['GET'])
 def get_history():

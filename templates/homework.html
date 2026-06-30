@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduCraft AI - Homework Studio</title>
+    <!-- Nhúng Google Font Outfit (Heading) và Inter (Body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-base: #f8fafc;
+            --bg-surface: #ffffff;
+            --border-color: #e2e8f0;
+            --border-hover: #cbd5e1;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --primary: #2563eb;
+            --primary-glow: rgba(37, 99, 235, 0.08);
+            --accent: #7c3aed;
+            --success: #059669;
+            --error: #dc2626;
+            --font-sans: 'Inter', sans-serif;
+            --font-display: 'Outfit', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            overflow: hidden;
+            letter-spacing: -0.01em;
+        }
+
+        /* --------------------- CUSTOM SCROLLBAR --------------------- */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.08);
+            border-radius: 99px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.16);
+        }
+
+        /* --------------------- SIDEBAR (FORM & SETUP) --------------------- */
+        aside {
+            background-color: var(--bg-surface);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 10;
+        }
+
+        .brand-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .brand-title {
+            font-family: var(--font-display);
+            font-size: 20px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-link {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--primary);
+            text-decoration: none;
+            padding: 4px 8px;
+            background: rgba(37, 99, 235, 0.08);
+            border-radius: 4px;
+            transition: var(--transition-smooth);
+        }
+
+        .nav-link:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Setup Form */
+        .setup-group {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .form-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-label {
+            font-size: 11.5px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .form-select, .form-input, .form-textarea {
+            width: 100%;
+            padding: 10px 12px;
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            font-size: 13px;
+            outline: none;
+            transition: var(--transition-smooth);
+        }
+
+        .form-select:focus, .form-input:focus, .form-textarea:focus {
+            border-color: var(--primary);
+            background: #ffffff;
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        /* Checkbox Rules */
+        .rules-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .rule-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12.5px;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .rule-checkbox input {
+            cursor: pointer;
+        }
+
+        .btn-generate {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-family: var(--font-sans);
+            font-size: 13.5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-generate:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);
+        }
+
+        .btn-generate:disabled {
+            background: #cbd5e1;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Mini Log Monitor in Sidebar */
+        .mini-console {
+            margin-top: auto;
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+        }
+
+        .console-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .console-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .timer-badge {
+            font-size: 11px;
+            font-family: var(--font-mono);
+            color: var(--text-secondary);
+        }
+
+        .console-logs {
+            height: 120px;
+            overflow-y: auto;
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            color: var(--text-secondary);
+        }
+
+        /* --------------------- MAIN WORKSPACE --------------------- */
+        main {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            background: radial-gradient(circle at 80% 0%, rgba(37, 99, 235, 0.02), transparent 50%);
+        }
+
+        /* HEADER */
+        header {
+            height: 64px;
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #ffffff;
+        }
+
+        .workspace-title {
+            font-family: var(--font-display);
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .workspace-tabs {
+            display: flex;
+            background: #f1f5f9;
+            padding: 3px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-family: var(--font-sans);
+            font-size: 12.5px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .tab-btn.active {
+            color: var(--text-primary);
+            background: #ffffff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        /* WORKSPACE VIEWER CONTENT */
+        .workspace-body {
+            flex-grow: 1;
+            padding: 32px;
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        /* BOARD VIEW: 5 CARDS */
+        .board-view {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .exercise-card {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.01);
+            transition: var(--transition-smooth);
+        }
+
+        .exercise-card:hover {
+            border-color: var(--border-hover);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.02);
+        }
+
+        .card-header {
+            background: #f8fafc;
+            border-bottom: 1px solid var(--border-color);
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-title {
+            font-family: var(--font-display);
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .card-badge {
+            font-size: 9.5px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .badge-basic {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+
+        .badge-advanced {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .badge-analysis {
+            background: #f3e8ff;
+            color: #6b21a8;
+        }
+
+        .badge-creation {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .card-score {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .card-body {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .card-info-block {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .block-title {
+            font-size: 11.5px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        .block-text {
+            font-size: 13px;
+            color: #334155;
+            line-height: 1.5;
+        }
+
+        .block-text ul {
+            margin-left: 16px;
+            margin-top: 4px;
+        }
+
+        .block-text li {
+            margin-bottom: 4px;
+        }
+
+        .code-preview {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: #0f172a;
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin-top: 6px;
+            overflow-x: auto;
+        }
+
+        /* DOCUMENT VIEW */
+        .document-view {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.01);
+            line-height: 1.6;
+        }
+
+        .document-view h1 {
+            font-family: var(--font-display);
+            font-size: 20px;
+            margin-bottom: 16px;
+            font-weight: 700;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .document-view h2 {
+            font-family: var(--font-display);
+            font-size: 15px;
+            margin: 24px 0 12px 0;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .document-view h3 {
+            font-size: 13.5px;
+            margin: 16px 0 8px 0;
+            font-weight: 600;
+        }
+
+        .document-view p, .document-view ul, .document-view ol {
+            font-size: 13px;
+            margin-bottom: 12px;
+            color: #334155;
+        }
+
+        .document-view li {
+            margin-left: 16px;
+            margin-bottom: 4px;
+        }
+
+        .document-view pre {
+            background: #f8fafc !important;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 14px;
+            overflow-x: auto;
+            margin: 12px 0;
+            font-family: var(--font-mono);
+            font-size: 12px;
+        }
+
+        .document-view code {
+            font-family: var(--font-mono);
+            background: #f1f5f9;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-size: 11.5px;
+        }
+
+        /* JSON VIEW */
+        .json-view pre {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: #334155;
+            overflow-x: auto;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.01);
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        /* EMPTY WORKSPACE */
+        .empty-workspace {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-muted);
+            gap: 12px;
+            text-align: center;
+        }
+
+        .empty-icon {
+            font-size: 40px;
+            opacity: 0.3;
+        }
+
+        .history-section {
+            margin-top: 18px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 240px;
+            overflow-y: auto;
+        }
+
+        .history-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+
+        .history-mini-item {
+            font-size: 12px;
+            color: var(--text-secondary);
+            padding: 6px 8px;
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .history-mini-item:hover {
+            border-color: var(--primary);
+            background: rgba(37, 99, 235, 0.04);
+            color: var(--primary);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR: FORM THIẾT LẬP BÀI TẬP -->
+    <aside>
+        <div class="brand-section">
+            <span class="brand-title">EduCraft AI</span>
+            <a href="/" class="nav-link">Soạn Bài Đọc</a>
+        </div>
+        
+        <div class="setup-group">
+            <div class="form-item">
+                <label class="form-label">Môn học</label>
+                <select class="form-select" id="subjectSelector">
+                    <option value="python">Python</option>
+                    <option value="java">Java</option>
+                    <option value="web">Web Front-end</option>
+                </select>
+            </div>
+            
+            <div class="form-item">
+                <label class="form-label">Chủ đề chính</label>
+                <input type="text" class="form-input" id="topicInput" placeholder="Ví dụ: Mảng và List, Loop..." value="Mảng và List trong Python">
+            </div>
+            
+            <div class="form-item">
+                <label class="form-label">Mục tiêu bài học</label>
+                <textarea class="form-textarea" id="objectiveInput" rows="3" placeholder="Ví dụ: Học viên sử dụng thành thạo append, insert, remove...">Học viên sẽ hiểu được cách sử dụng các hàm cơ bản của List để xử lý dữ liệu.</textarea>
+            </div>
+
+            <div class="form-item">
+                <label class="form-label">Kiểm duyệt bắt buộc</label>
+                <div class="rules-container">
+                    <label class="rule-checkbox">
+                        <input type="checkbox" checked disabled>
+                        <span>Bài 1&2 phải có code lỗi mẫu</span>
+                    </label>
+                    <label class="rule-checkbox">
+                        <input type="checkbox" checked disabled>
+                        <span>Bài 4 yêu cầu so sánh đa giải pháp</span>
+                    </label>
+                    <label class="rule-checkbox">
+                        <input type="checkbox" checked disabled>
+                        <span>Cấm từ khóa định hướng "HOW"</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-generate" id="btnSubmit">
+            <!-- Sparkles SVG -->
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 15px; height: 15px;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 21l-.813-5.096L3 15l5.096-.813L9 9l.813 5.187L15 15l-5.187.904ZM18 13.5l-.5 3-.5-3-3-.5 3-.5.5-3 .5 3 3 .5-3 .5ZM19.5 4.5l-.25 1.5-.25-1.5-1.5-.25 1.5-.25.25-1.5.25 1.5 1.5.25-1.5.25Z" />
+            </svg>
+            <span>Sinh Bộ Bài Tập</span>
+        </button>
+
+        <!-- Lịch sử bài tập -->
+        <div class="history-section">
+            <div class="history-title">Bài tập gần đây</div>
+            <div id="miniHistoryList">
+                <!-- Nạp tự động -->
+            </div>
+        </div>
+
+        <!-- Log Monitor -->
+        <div class="mini-console">
+            <div class="console-header">
+                <span class="console-title">Tiến trình vận hành</span>
+                <span class="timer-badge" id="timerBadge">00:00</span>
+            </div>
+            <div class="console-logs" id="consoleLogs">
+                <div style="font-size:10.5px; color:var(--text-muted);">Đang chờ lệnh tạo bài tập...</div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- KHU VỰC Workspace ĐẦU RA -->
+    <main>
+        <header>
+            <div class="workspace-title" id="activeFileTitle">
+                <!-- Document Icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 16px; height: 16px; color: var(--primary);">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                </svg>
+                <span>Chưa chọn bộ bài tập</span>
+            </div>
+            
+            <div class="header-actions">
+                <div class="workspace-tabs">
+                    <button class="tab-btn active" id="tabBoardBtn">Bảng Bài Tập</button>
+                    <button class="tab-btn" id="tabDocBtn">Giáo Án Markdown</button>
+                    <button class="tab-btn" id="tabJsonBtn">JSON Gốc</button>
+                </div>
+                
+                <button class="btn-action" id="btnCopy">
+                    <!-- Copy SVG -->
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 14px; height: 14px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H5.25m11.9-3.664A2.251 2.251 0 0 0 15 2.25h-3a2.251 2.251 0 0 0-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.375c0-.621.504-1.125 1.125-1.125h9.75c.621 0 1.125.504 1.125 1.125v12.75c0 .621-.504 1.125-1.125 1.125H7.875a1.125 1.125 0 0 1-1.125-1.125V7.375Z" />
+                    </svg>
+                    <span>Sao Chép</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- KHO LÀM VIỆC CHÍNH -->
+        <div class="workspace-body" id="workspaceContainer">
+            
+            <!-- EMPTY WORKSPACE INITIAL STATE -->
+            <div class="empty-workspace" id="emptyWorkspaceState">
+                <div class="empty-icon">📂</div>
+                <p>Điền thông tin chủ đề bên trái và chọn nút sinh hoặc chọn bộ bài tập cũ từ danh sách lịch sử.</p>
+            </div>
+
+            <!-- BOARD VIEW (5 BÀI TẬP DẠNG THẺ CHI TIẾT) -->
+            <div class="board-view hidden" id="boardView">
+                <!-- Bài 1 -->
+                <div class="exercise-card">
+                    <div class="card-header">
+                        <div class="card-title-group">
+                            <span class="card-badge badge-basic">Cơ bản - Bài 1</span>
+                            <span class="card-title" id="ex1_title">Tải dữ liệu...</span>
+                        </div>
+                        <span class="card-score">Điểm: 1.5đ</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-info-block">
+                            <span class="block-title">Bối cảnh nghiệp vụ</span>
+                            <div class="block-text" id="ex1_context">...</div>
+                        </div>
+                        <div class="card-info-block">
+                            <span class="block-title">Mã nguồn lỗi mẫu & Yêu cầu</span>
+                            <div class="block-text" id="ex1_req">...</div>
+                            <pre class="code-preview" id="ex1_code">...</pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Bài 2 -->
+                <div class="exercise-card">
+                    <div class="card-header">
+                        <div class="card-title-group">
+                            <span class="card-badge badge-basic">Cơ bản - Bài 2</span>
+                            <span class="card-title" id="ex2_title">Tải dữ liệu...</span>
+                        </div>
+                        <span class="card-score">Điểm: 1.5đ</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-body-inner" style="grid-column: 1 / span 2; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div class="card-info-block">
+                                <span class="block-title">Bối cảnh nghiệp vụ</span>
+                                <div class="block-text" id="ex2_context">...</div>
+                            </div>
+                            <div class="card-info-block">
+                                <span class="block-title">Mã nguồn lỗi mẫu & Yêu cầu</span>
+                                <div class="block-text" id="ex2_req">...</div>
+                                <pre class="code-preview" id="ex2_code">...</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bài 3 -->
+                <div class="exercise-card">
+                    <div class="card-header">
+                        <div class="card-title-group">
+                            <span class="card-badge badge-advanced">Chuyên sâu - Bài 3</span>
+                            <span class="card-title" id="ex3_title">Tải dữ liệu...</span>
+                        </div>
+                        <span class="card-score">Điểm: 2.0đ</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-info-block">
+                            <span class="block-title">Nội dung yêu cầu nghiệp vụ</span>
+                            <div class="block-text" id="ex3_context">...</div>
+                        </div>
+                        <div class="card-info-block">
+                            <span class="block-title">Yêu cầu nộp bài</span>
+                            <div class="block-text" id="ex3_req">...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bài 4 -->
+                <div class="exercise-card">
+                    <div class="card-header">
+                        <div class="card-title-group">
+                            <span class="card-badge badge-analysis">Phân tích - Bài 4</span>
+                            <span class="card-title" id="ex4_title">Tải dữ liệu...</span>
+                        </div>
+                        <span class="card-score">Điểm: 2.0đ</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-info-block">
+                            <span class="block-title">Nội dung yêu cầu nghiệp vụ</span>
+                            <div class="block-text" id="ex4_context">...</div>
+                        </div>
+                        <div class="card-info-block">
+                            <span class="block-title">Yêu cầu nộp bài (Đa giải pháp/Trade-off)</span>
+                            <div class="block-text" id="ex4_req">...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bài 5 -->
+                <div class="exercise-card">
+                    <div class="card-header">
+                        <div class="card-title-group">
+                            <span class="card-badge badge-creation">Sáng tạo - Bài 5</span>
+                            <span class="card-title" id="ex5_title">Tải dữ liệu...</span>
+                        </div>
+                        <span class="card-score">Điểm: 3.0đ</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-info-block">
+                            <span class="block-title">Bối cảnh nghiệp vụ & Kiến trúc</span>
+                            <div class="block-text" id="ex5_context">...</div>
+                        </div>
+                        <div class="card-info-block">
+                            <span class="block-title">Yêu cầu nộp bài (Thiết kế Module/Ngoại lệ)</span>
+                            <div class="block-text" id="ex5_req">...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DOCUMENT VIEW (GIÁO ÁN MD) -->
+            <div class="document-view hidden" id="docView">
+                <!-- Nội dung Markdown render -->
+            </div>
+
+            <!-- JSON VIEW -->
+            <div class="json-view hidden" id="jsonView">
+                <pre><code id="jsonContent"></code></pre>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // DOM Elements
+        const subjectSelector = document.getElementById('subjectSelector');
+        const topicInput = document.getElementById('topicInput');
+        const objectiveInput = document.getElementById('objectiveInput');
+        const btnSubmit = document.getElementById('btnSubmit');
+        const miniHistoryList = document.getElementById('miniHistoryList');
+        const consoleLogs = document.getElementById('consoleLogs');
+        const timerBadge = document.getElementById('timerBadge');
+        
+        const activeFileTitle = document.getElementById('activeFileTitle').querySelector('span');
+        const tabBoardBtn = document.getElementById('tabBoardBtn');
+        const tabDocBtn = document.getElementById('tabDocBtn');
+        const tabJsonBtn = document.getElementById('tabJsonBtn');
+        const btnCopy = document.getElementById('btnCopy');
+        
+        const emptyWorkspaceState = document.getElementById('emptyWorkspaceState');
+        const boardView = document.getElementById('boardView');
+        const docView = document.getElementById('docView');
+        const jsonView = document.getElementById('jsonView');
+        const jsonContent = document.getElementById('jsonContent');
+
+        // State Variables
+        let currentMarkdown = "";
+        let currentJson = "";
+        let timerInterval = null;
+        let elapsedSeconds = 0;
+        let allHistoryFiles = [];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadHistory();
+        });
+
+        // Tải lịch sử
+        async function loadHistory() {
+            try {
+                const res = await fetch('/api/history');
+                const data = await res.json();
+                if (data.status === 'success') {
+                    allHistoryFiles = data.files;
+                    
+                    // Lọc lịch sử bài tập (Loại bỏ các bài đọc chứa 'reading')
+                    const homeworks = allHistoryFiles.filter(f => !f.filename.toLowerCase().includes('reading'));
+                    renderHistory(homeworks);
+                }
+            } catch (err) {
+                console.error("Lỗi khi tải lịch sử:", err);
+            }
+        }
+
+        // Render lịch sử mini
+        function renderHistory(files) {
+            miniHistoryList.innerHTML = '';
+            if (files.length === 0) {
+                miniHistoryList.innerHTML = '<div style="font-size:11.5px; color:var(--text-muted); text-align:center; padding:10px 0;">Chưa có dữ liệu bài tập.</div>';
+                return;
+            }
+            
+            files.slice(0, 5).forEach(file => {
+                const item = document.createElement('div');
+                item.className = 'history-mini-item';
+                const formattedName = file.filename
+                    .replace('GiaoAnStandard_', '')
+                    .replace('.md', '')
+                    .replace(/_/g, ' ');
+                item.textContent = formattedName;
+                item.title = formattedName;
+                
+                item.addEventListener('click', () => {
+                    activeFileTitle.textContent = formattedName;
+                    loadHomeworkFile(file.filename, file.json_filename);
+                });
+                miniHistoryList.appendChild(item);
+            });
+        }
+
+        // Tải chi tiết file bài tập
+        async function loadHomeworkFile(mdFilename, jsonFilename) {
+            try {
+                // Tải Markdown
+                const resMd = await fetch(`/api/view?file=${mdFilename}&type=markdown`);
+                const dataMd = await resMd.json();
+                
+                if (dataMd.status === 'success') {
+                    currentMarkdown = dataMd.content;
+                    renderMarkdownHTML(currentMarkdown);
+                }
+                
+                // Tải JSON
+                if (jsonFilename) {
+                    const resJson = await fetch(`/api/view?file=${jsonFilename}&type=json`);
+                    const dataJson = await resJson.json();
+                    if (dataJson.status === 'success') {
+                        currentJson = dataJson.content;
+                        jsonContent.textContent = JSON.stringify(JSON.parse(currentJson), null, 2);
+                        
+                        // Đẩy dữ liệu vào Board View dạng thẻ
+                        parseAndPopulateBoard(JSON.parse(currentJson));
+                    }
+                } else {
+                    jsonContent.textContent = "Không tìm thấy file JSON tương ứng.";
+                }
+                
+                emptyWorkspaceState.classList.add('hidden');
+                // Hiển thị tab hiện tại
+                switchTab('board');
+                
+            } catch (err) {
+                console.error("Lỗi khi đọc file:", err);
+            }
+        }
+
+        // Trích xuất JSON bài tập đưa lên các thẻ Board View
+        function parseAndPopulateBoard(jsonObj) {
+            const list = jsonObj.danh_sach_bai_tap || [];
+            
+            for (let i = 0; i < 5; i++) {
+                const bt = list[i] || {};
+                const indexStr = (i + 1).toString();
+                
+                const titleEl = document.getElementById(`ex${indexStr}_title`);
+                const contextEl = document.getElementById(`ex${indexStr}_context`);
+                const reqEl = document.getElementById(`ex${indexStr}_req`);
+                const codeEl = document.getElementById(`ex${indexStr}_code`);
+                
+                if (titleEl) titleEl.textContent = bt.ten_bai_tap || `Bài tập số ${indexStr}`;
+                
+                let contextHtml = bt.boi_canh || "";
+                if (bt.vai_tro) {
+                    contextHtml += `<p style="margin-top:6px; font-weight:500;">Vai trò: ${bt.vai_tro}</p>`;
+                }
+                if (bt.van_de) {
+                    contextHtml += `<p style="margin-top:6px; color:var(--error);">Vấn đề: ${bt.van_de}</p>`;
+                }
+                if (contextEl) contextEl.innerHTML = contextHtml;
+                
+                let reqHtml = bt.yeu_cau_dau_ra || "";
+                if (reqEl) reqEl.innerHTML = reqHtml;
+                
+                if (codeEl) {
+                    if (bt.code_loi_chua_sua) {
+                        codeEl.textContent = bt.code_loi_chua_sua;
+                        codeEl.parentElement.classList.remove('hidden');
+                    } else {
+                        codeEl.parentElement.classList.add('hidden');
+                    }
+                }
+            }
+        }
+
+        // Tạo log
+        function addLog(text, type = '') {
+            const line = document.createElement('div');
+            line.style.marginBottom = '4px';
+            line.style.animation = 'logFadeIn 0.2s ease-out';
+            if (type === 'success') line.style.color = 'var(--success)';
+            if (type === 'error') line.style.color = 'var(--error)';
+            if (type === 'active') line.style.color = 'var(--primary)';
+            
+            line.textContent = `> ${text}`;
+            consoleLogs.appendChild(line);
+            consoleLogs.scrollTop = consoleLogs.scrollHeight;
+        }
+
+        // Hẹn giờ
+        function startTimer() {
+            elapsedSeconds = 0;
+            timerBadge.textContent = "00:00";
+            timerInterval = setInterval(() => {
+                elapsedSeconds++;
+                const mins = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
+                const secs = String(elapsedSeconds % 60).padStart(2, '0');
+                timerBadge.textContent = `${mins}:${secs}`;
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
+        // Render Markdown
+        function renderMarkdownHTML(mdText) {
+            if (!mdText) return;
+            let html = mdText
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+                
+            html = html.replace(/^#\s+(.+)$/gm, '<h1>$1</h1>');
+            html = html.replace(/^##\s+(.+)$/gm, '<h2>$1</h2>');
+            html = html.replace(/^###\s+(.+)$/gm, '<h3>$1</h3>');
+            html = html.replace(/^---$/gm, '<hr>');
+            html = html.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>');
+            html = html.replace(/^▪\s+(.+)$/gm, '<li>▪ $1</li>');
+            html = html.replace(/^\*\s+(.+)$/gm, '<li>• $1</li>');
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            html = html.replace(/\n\n/g, '<p></p>');
+            docView.innerHTML = html;
+        }
+
+        // Điều khiển Tab
+        function switchTab(tabType) {
+            tabBoardBtn.classList.remove('active');
+            tabDocBtn.classList.remove('active');
+            tabJsonBtn.classList.remove('active');
+            
+            boardView.classList.add('hidden');
+            docView.classList.add('hidden');
+            jsonView.classList.add('hidden');
+            
+            if (tabType === 'board') {
+                tabBoardBtn.classList.add('active');
+                boardView.classList.remove('hidden');
+            } else if (tabType === 'doc') {
+                tabDocBtn.classList.add('active');
+                docView.classList.remove('hidden');
+            } else if (tabType === 'json') {
+                tabJsonBtn.classList.add('active');
+                jsonView.classList.remove('hidden');
+            }
+        }
+
+        tabBoardBtn.addEventListener('click', () => switchTab('board'));
+        tabDocBtn.addEventListener('click', () => switchTab('doc'));
+        tabJsonBtn.addEventListener('click', () => switchTab('json'));
+
+        // Sao chép
+        btnCopy.addEventListener('click', () => {
+            const isJson = tabJsonBtn.classList.contains('active');
+            const textToCopy = isJson ? jsonContent.textContent : currentMarkdown;
+            
+            if (textToCopy) {
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    const originalText = btnCopy.innerHTML;
+                    btnCopy.innerHTML = `<span>Đã chép!</span>`;
+                    btnCopy.style.borderColor = "var(--success)";
+                    setTimeout(() => {
+                        btnCopy.innerHTML = originalText;
+                        btnCopy.style.borderColor = "var(--border-color)";
+                    }, 2000);
+                });
+            }
+        });
+
+        // Polling status
+        let displayedLogCount = 0;
+
+        function pollTaskStatus(taskId) {
+            displayedLogCount = 0;
+            const intervalId = setInterval(async () => {
+                try {
+                    const res = await fetch(`/api/status?task_id=${taskId}`);
+                    const data = await res.json();
+                    
+                    if (data.logs && data.logs.length > displayedLogCount) {
+                        for (let i = displayedLogCount; i < data.logs.length; i++) {
+                            const rawLog = data.logs[i];
+                            let logType = '';
+                            if (rawLog.includes('APPROVED') || rawLog.includes('thành công') || rawLog.includes('Hoan thanh')) {
+                                logType = 'success';
+                            } else if (rawLog.includes('Loi') || rawLog.includes('REJECTED') || rawLog.includes('THAT BAI')) {
+                                logType = 'error';
+                            } else if (rawLog.includes('Dang suy nghi') || rawLog.includes('Tiến hành') || rawLog.includes('Kiem duyet')) {
+                                logType = 'active';
+                            }
+                            addLog(rawLog, logType);
+                        }
+                        displayedLogCount = data.logs.length;
+                    }
+                    
+                    if (data.status === 'success') {
+                        clearInterval(intervalId);
+                        stopTimer();
+                        
+                        const result = data.result;
+                        addLog(`Học liệu bài tập đã thiết kế thành công!`, 'success');
+                        
+                        currentMarkdown = result.markdown_content;
+                        currentJson = result.json_content;
+                        
+                        const cleanName = result.markdown_name
+                            .replace('GiaoAnStandard_', '')
+                            .replace('.md', '')
+                            .replace(/_/g, ' ');
+                        activeFileTitle.textContent = cleanName;
+                        
+                        renderMarkdownHTML(currentMarkdown);
+                        jsonContent.textContent = JSON.stringify(JSON.parse(currentJson), null, 2);
+                        parseAndPopulateBoard(JSON.parse(currentJson));
+                        
+                        await loadHistory();
+                        
+                        emptyWorkspaceState.classList.add('hidden');
+                        switchTab('board');
+                        
+                        btnSubmit.disabled = false;
+                        subjectSelector.disabled = false;
+                        topicInput.disabled = false;
+                        objectiveInput.disabled = false;
+                        
+                    } else if (data.status === 'error') {
+                        clearInterval(intervalId);
+                        stopTimer();
+                        addLog(`Lỗi xử lý: ${data.error_message}`, 'error');
+                        btnSubmit.disabled = false;
+                        subjectSelector.disabled = false;
+                        topicInput.disabled = false;
+                        objectiveInput.disabled = false;
+                    }
+                } catch (err) {
+                    clearInterval(intervalId);
+                    stopTimer();
+                    addLog(`Lỗi kiểm tra tiến trình: ${err.message}`, 'error');
+                    btnSubmit.disabled = false;
+                }
+            }, 2000);
+        }
+
+        // BẮT ĐẦU GENERATE BÀI TẬP
+        btnSubmit.addEventListener('click', async () => {
+            const subject = subjectSelector.value;
+            const topic = topicInput.value.trim();
+            const objective = objectiveInput.value.trim();
+            
+            if (!topic) {
+                alert("Vui lòng điền chủ đề chính!");
+                return;
+            }
+            
+            const prompt = `Thiết kế bộ bài tập về nhà môn ${subject} chủ đề '${topic}' với mục tiêu '${objective}'. Đảm bảo đúng tiêu chuẩn bài tập Rikkei.`;
+            
+            btnSubmit.disabled = true;
+            subjectSelector.disabled = true;
+            topicInput.disabled = true;
+            objectiveInput.disabled = true;
+            consoleLogs.innerHTML = '';
+            
+            startTimer();
+            addLog(`Khởi chạy pipeline tạo bài tập môn ${subject}...`, 'active');
+            addLog(`Tạo tác vụ bất đồng bộ trên nền hệ thống...`, 'active');
+            
+            try {
+                const res = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt })
+                });
+                const data = await res.json();
+                
+                if (data.status === 'processing') {
+                    pollTaskStatus(data.task_id);
+                } else {
+                    stopTimer();
+                    addLog(`Khởi tạo thất bại: ${data.message}`, 'error');
+                    btnSubmit.disabled = false;
+                    subjectSelector.disabled = false;
+                    topicInput.disabled = false;
+                    objectiveInput.disabled = false;
+                }
+            } catch (err) {
+                stopTimer();
+                addLog(`Lỗi mạng: ${err.message}`, 'error');
+                btnSubmit.disabled = false;
+                subjectSelector.disabled = false;
+                topicInput.disabled = false;
+                objectiveInput.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
